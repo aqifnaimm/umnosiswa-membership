@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 
-const zones = ["Utara", "Tengah", "Selatan", "Pantai Timur", "Sabah", "Sarawak"];
+const zones = ["Utara", "Lembah Klang", "Selatan", "Pantai Timur", "Sabah", "Sarawak"];
 
 export default function RegisterPage() {
   const [message, setMessage] = useState("");
