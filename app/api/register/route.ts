@@ -1,17 +1,70 @@
-import {NextResponse} from "next/server";
-import {createClient} from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-function auth(req:Request){const got=req.headers.get("x-admin-key");const expected=process.env.ADMIN_DASHBOARD_KEY;return !!expected&&got===expected}
-function db(){const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!u||!k)throw new Error("Supabase env belum lengkap.");return createClient(u,k)}
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
 
-export async function GET(req:Request){
- if(!auth(req))return NextResponse.json({error:"Admin key tidak sah."},{status:401});
- try{const {data,error}=await db().from("membership_applications").select("*").order("created_at",{ascending:false});if(error)throw error;return NextResponse.json({members:data||[]})}
- catch(e:any){return NextResponse.json({error:e.message||"Gagal mendapatkan data."},{status:500})}
-}
-export async function PATCH(req:Request){
- if(!auth(req))return NextResponse.json({error:"Admin key tidak sah."},{status:401});
- try{const b=await req.json();if(!b.id||!["approved","rejected"].includes(b.status))return NextResponse.json({error:"Permintaan tidak sah."},{status:400});
- const {data,error}=await db().from("membership_applications").update({status:b.status}).eq("id",b.id).select("*").single();if(error)throw error;return NextResponse.json({ok:true,member:data})}
- catch(e:any){return NextResponse.json({error:e.message||"Gagal mengemaskini."},{status:500})}
+    const required = [
+      "full_name",
+      "phone_number",
+      "email",
+      "ic_number",
+      "umno_member_no",
+      "ipt_name",
+      "graduation_year",
+      "ipt_zone",
+      "umno_division"
+    ];
+
+    for (const key of required) {
+      if (!body[key]) {
+        return NextResponse.json(
+          { error: `Medan ${key} diperlukan.` },
+          { status: 400 }
+        );
+      }
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json(
+        { error: "Supabase belum dikonfigurasi." },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    const { error } = await supabase
+      .from("membership_applications")
+      .insert({
+        full_name: body.full_name,
+        phone_number: body.phone_number,
+        email: body.email.toLowerCase(),
+        ic_number: body.ic_number,
+        umno_member_no: body.umno_member_no,
+        ipt_name: body.ipt_name,
+        graduation_year: Number(body.graduation_year),
+        ipt_zone: body.ipt_zone,
+        umno_division: body.umno_division,
+        status: "pending"
+      });
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Permintaan tidak sah." },
+      { status: 400 }
+    );
+  }
 }
