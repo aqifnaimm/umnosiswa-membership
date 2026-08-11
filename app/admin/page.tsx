@@ -194,7 +194,7 @@ export default function AdminPage() {
             </div>
 
             <p className="admin-motto">
-              BERSATU <b>•</b> BERSETIA <b>•</b> BERKHIDMAT
+              BERSATU <b>•</b> BERKHIDMAT <b>•</b> BERKORBAN
             </p>
           </div>
         </section>
