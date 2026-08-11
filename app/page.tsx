@@ -3,90 +3,135 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <>
-      <nav className="nav">
-        <div className="container nav-inner">
-          <Link href="/" className="brand">
-            <Image src="/umnos-logo.jpeg" alt="UMNOSiswa" width={180} height={120} />
+    <main className="home-shell">
+      <div className="home-bg-grid" />
+
+      <nav className="home-nav">
+        <div className="home-container home-nav-inner">
+          <Link href="/" className="home-brand">
+            <div className="home-brand-box">
+              <Image
+                src="/umnos-logo.jpeg"
+                alt="UMNOSiswa"
+                width={220}
+                height={120}
+                priority
+              />
+            </div>
           </Link>
-          <div className="nav-links">
+
+          <div className="home-nav-links">
             <a href="#tentang">Tentang</a>
             <a href="#keahlian">Keahlian</a>
-            <Link href="/login">Login</Link>
-            <Link className="btn btn-primary" href="/daftar">Daftar Sekarang</Link>
+            <Link href="/login">Portal Ahli</Link>
+            <Link className="home-nav-btn" href="/daftar">Daftar Sekarang</Link>
           </div>
         </div>
       </nav>
 
-      <main>
-        <section className="hero">
-          <div className="container hero-grid">
-            <div>
-              <span className="eyebrow">Portal Keahlian Rasmi</span>
-              <h1>Keahlian UMNOSiswa Malaysia</h1>
-              <p className="lead">
-                Platform pendaftaran dan pengurusan ahli UMNOSiswa untuk mahasiswa
-                dan graduan IPT di seluruh Malaysia.
-              </p>
-              <div style={{display:"flex",gap:12,flexWrap:"wrap",marginTop:26}}>
-                <Link className="btn btn-primary" href="/daftar">Daftar Sebagai Ahli</Link>
-                <Link className="btn btn-outline" href="/login">Portal Ahli</Link>
-              </div>
+      <section className="home-hero">
+        <div className="home-container home-hero-grid">
+          <div className="home-hero-copy">
+            <span className="home-kicker">PORTAL KEAHLIAN RASMI</span>
+            <h1>Keahlian UMNOSiswa Malaysia</h1>
+            <p>
+              Platform pendaftaran dan pengurusan keahlian untuk mahasiswa
+              dan graduan IPT di seluruh Malaysia.
+            </p>
+
+            <div className="home-hero-actions">
+              <Link className="home-primary-btn" href="/daftar">
+                Daftar Sebagai Ahli
+                <span>→</span>
+              </Link>
+              <Link className="home-secondary-btn" href="/login">
+                Portal Ahli
+              </Link>
             </div>
 
-            <div className="hero-card">
+            <div className="home-motto">
+              <span>BERSATU</span><b>•</b><span>BERSETIA</span><b>•</b><span>BERKHIDMAT</span>
+            </div>
+          </div>
+
+          <div className="home-hero-card">
+            <div className="home-card-glow" />
+            <div className="home-logo-panel">
               <Image
                 src="/umnos-logo.jpeg"
                 alt="Logo UMNOSiswa"
-                width={800}
-                height={600}
+                width={760}
+                height={500}
                 priority
               />
-              <p className="small" style={{marginBottom:0}}>
-                Pendaftaran akan disemak oleh pentadbir sebelum status keahlian diaktifkan.
-              </p>
+            </div>
+
+            <div className="home-card-info">
+              <div>
+                <small>Status Permohonan</small>
+                <strong>Semakan Pentadbir</strong>
+              </div>
+              <span className="home-status-dot" />
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="tentang" className="section">
-          <div className="container">
-            <span className="eyebrow">Tentang Portal</span>
-            <h2>Satu sistem untuk semua ahli</h2>
-            <div className="grid-3" style={{marginTop:28}}>
-              <div className="card">
-                <h3>Pendaftaran Mudah</h3>
-                <p className="small">Isi maklumat keahlian, IPT dan Bahagian UMNO dalam satu borang.</p>
-              </div>
-              <div className="card">
-                <h3>Semakan Pentadbir</h3>
-                <p className="small">Setiap permohonan boleh melalui proses semakan sebelum diluluskan.</p>
-              </div>
-              <div className="card">
-                <h3>Portal Ahli</h3>
-                <p className="small">Ahli yang diluluskan boleh mempunyai profil dan nombor keahlian UMNOSiswa.</p>
-              </div>
-            </div>
+      <section id="tentang" className="home-section">
+        <div className="home-container">
+          <div className="home-section-head">
+            <span className="home-kicker">SATU SISTEM, SATU KOMUNITI</span>
+            <h2>Pengurusan keahlian yang lebih tersusun</h2>
+            <p>
+              Daftar, semak status permohonan dan urus rekod keahlian melalui satu portal.
+            </p>
           </div>
-        </section>
 
-        <section id="keahlian" className="section" style={{paddingTop:0}}>
-          <div className="container">
-            <div className="card" style={{textAlign:"center",padding:"42px 24px"}}>
-              <span className="eyebrow">Sertai UMNOSiswa</span>
-              <h2 style={{marginTop:12}}>Mulakan pendaftaran anda</h2>
-              <p className="lead" style={{margin:"0 auto 24px",fontSize:17}}>
-                Sediakan nombor ahli UMNO, maklumat IPT, zon IPT dan Bahagian UMNO anda.
-              </p>
-              <Link className="btn btn-primary" href="/daftar">Buka Borang Pendaftaran</Link>
-            </div>
+          <div className="home-feature-grid">
+            <article className="home-feature-card">
+              <div className="home-feature-no">01</div>
+              <h3>Pendaftaran Mudah</h3>
+              <p>Isi maklumat keahlian, IPT, zon dan Bahagian UMNO dalam satu borang.</p>
+            </article>
+
+            <article className="home-feature-card">
+              <div className="home-feature-no">02</div>
+              <h3>Semakan Pentadbir</h3>
+              <p>Permohonan melalui proses semakan sebelum status keahlian diaktifkan.</p>
+            </article>
+
+            <article className="home-feature-card">
+              <div className="home-feature-no">03</div>
+              <h3>Nombor Ahli UMNOSiswa</h3>
+              <p>Ahli yang diluluskan menerima ID keahlian UMNOSiswa secara automatik.</p>
+            </article>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      <footer className="footer">
-        <div className="container">© 2026 UMNOSiswa Malaysia. Portal keahlian.</div>
+      <section id="keahlian" className="home-cta-section">
+        <div className="home-container">
+          <div className="home-cta-card">
+            <div>
+              <span className="home-kicker">SERTAI UMNOSISWA</span>
+              <h2>Mulakan pendaftaran anda hari ini</h2>
+              <p>Sediakan nombor ahli UMNO, maklumat IPT, zon IPT dan Bahagian UMNO.</p>
+            </div>
+
+            <Link className="home-primary-btn" href="/daftar">
+              Buka Borang Pendaftaran
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="home-footer">
+        <div className="home-container home-footer-inner">
+          <span>© 2026 UMNOSiswa Malaysia</span>
+          <span>BERSATU • BERSETIA • BERKHIDMAT</span>
+        </div>
       </footer>
-    </>
+    </main>
   );
 }
