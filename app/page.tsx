@@ -147,6 +147,72 @@ export default function HomePage() {
         </div>
       </section>
 
+
+      <section className="homev3-card-preview">
+        <div className="homev3-container homev3-card-preview-grid">
+          <div className="homev3-card-preview-copy">
+            <span className="homev3-kicker">KAD AHLI DIGITAL</span>
+            <h2>Keahlian anda, dalam satu kad digital.</h2>
+            <p>
+              Ahli yang telah diluluskan akan menerima ID UMNOSiswa unik,
+              status keahlian aktif dan akses kepada kad digital dengan QR verification.
+            </p>
+
+            <div className="homev3-card-preview-points">
+              <div><span>✓</span><strong>ID UMNOSiswa</strong><small>Format USXXXXXX</small></div>
+              <div><span>✓</span><strong>QR Verification</strong><small>Semakan keahlian pantas</small></div>
+              <div><span>✓</span><strong>Status Keahlian</strong><small>ACTIVE untuk ahli diluluskan</small></div>
+            </div>
+
+            <Link href="/portal" className="homev3-primary-btn">
+              Akses Portal Ahli
+              <span>→</span>
+            </Link>
+          </div>
+
+          <div className="homev3-card-mockup-wrap">
+            <div className="homev3-card-mockup">
+              <div className="homev3-card-mockup-top">
+                <div className="homev3-card-mockup-logo">
+                  <Image
+                    src="/umnos-logo.jpeg"
+                    alt="UMNOSiswa"
+                    width={210}
+                    height={110}
+                  />
+                </div>
+                <span className="homev3-card-active">ACTIVE</span>
+              </div>
+
+              <div className="homev3-card-mockup-body">
+                <small>KAD KEAHLIAN DIGITAL</small>
+                <h3>MUHAMMAD AQIF NAIM</h3>
+                <div className="homev3-card-id">US000001</div>
+
+                <div className="homev3-card-details">
+                  <div><span>IPT</span><strong>IIUM / UIAM</strong></div>
+                  <div><span>ZON IPT</span><strong>Lembah Klang</strong></div>
+                  <div><span>BAHAGIAN UMNO</span><strong>Gombak</strong></div>
+                </div>
+              </div>
+
+              <div className="homev3-card-mockup-bottom">
+                <span>BERSATU • BERSETIA • BERKHIDMAT</span>
+                <div className="homev3-card-qr">
+                  <div className="homev3-qr-grid">
+                    {Array.from({ length: 49 }).map((_, i) => (
+                      <i key={i} className={i % 3 === 0 || i % 7 === 0 || i % 5 === 0 ? "on" : ""} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="homev3-card-shadow-card" />
+          </div>
+        </div>
+      </section>
+
       <section id="statistik" className="homev3-stats">
         <div className="homev3-container">
           <div className="homev3-section-head">
@@ -160,7 +226,7 @@ export default function HomePage() {
           <div className="homev3-stat-grid">
             <article><span>Ahli Aktif</span><strong>—</strong><small>Jumlah approved members</small></article>
             <article><span>IPT Terlibat</span><strong>—</strong><small>Institusi dengan ahli berdaftar</small></article>
-            <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
+            <article><span>Zon IPT</span><strong>6</strong><small>Utara, Tengah, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
           </div>
         </div>
       </section>
