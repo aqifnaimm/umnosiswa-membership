@@ -14,7 +14,7 @@ type Member = {
 };
 
 export default function MemberPortal() {
-  const [umnoNo, setUmnoNo] = useState("");
+  const [memberId, setMemberId] = useState("");
   const [icLast4, setIcLast4] = useState("");
   const [member, setMember] = useState<Member | null>(null);
   const [msg, setMsg] = useState("");
@@ -29,13 +29,19 @@ export default function MemberPortal() {
       const r = await fetch("/api/member/lookup", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ umno_member_no: umnoNo, ic_last4: icLast4 })
+        body: JSON.stringify({
+          membership_id: memberId.trim().toUpperCase(),
+          ic_last4: icLast4
+        })
       });
+
       const d = await r.json();
+
       if (!r.ok) {
         setMsg(d.error || "Rekod tidak ditemui.");
         return;
       }
+
       setMember(d.member);
     } catch {
       setMsg("Tidak dapat berhubung dengan server.");
@@ -55,19 +61,36 @@ export default function MemberPortal() {
             <Image src="/umnos-logo.jpeg" alt="UMNOSiswa" width={280} height={150} priority />
           </div>
           <span>PORTAL AHLI</span>
-          <h1>Semakan Keahlian UMNOSiswa</h1>
-          <p>Semak status permohonan dan kad keahlian digital anda.</p>
+          <h1>Login Ahli UMNOSiswa</h1>
+          <p>Masukkan ID UMNOSiswa dan 4 digit terakhir nombor IC anda.</p>
         </div>
 
         {!member && (
           <div className="member-lookup-card">
-            <label>No. Ahli UMNO</label>
-            <input value={umnoNo} onChange={e=>setUmnoNo(e.target.value)} placeholder="Masukkan No. Ahli UMNO" />
+            <label>ID UMNOSiswa</label>
+            <input
+              value={memberId}
+              onChange={e=>setMemberId(e.target.value.toUpperCase().replace(/\s/g,""))}
+              placeholder="Contoh: US000001"
+              maxLength={8}
+            />
+
             <label>4 digit terakhir No. IC</label>
-            <input value={icLast4} onChange={e=>setIcLast4(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="Contoh: 1234" inputMode="numeric" maxLength={4} />
-            <button disabled={loading || !umnoNo || icLast4.length !== 4} onClick={check}>
-              {loading ? "Menyemak..." : "Semak Keahlian →"}
+            <input
+              value={icLast4}
+              onChange={e=>setIcLast4(e.target.value.replace(/\D/g,"").slice(0,4))}
+              placeholder="Contoh: 1234"
+              inputMode="numeric"
+              maxLength={4}
+            />
+
+            <button
+              disabled={loading || !memberId || icLast4.length !== 4}
+              onClick={check}
+            >
+              {loading ? "Menyemak..." : "Log Masuk →"}
             </button>
+
             {msg && <div className="member-error">{msg}</div>}
           </div>
         )}
@@ -103,7 +126,7 @@ export default function MemberPortal() {
                 </div>
 
                 <p className="member-note">
-                  Status keahlian anda aktif. Gunakan nombor ahli UMNOSiswa di atas untuk rujukan.
+                  Keahlian anda aktif.
                 </p>
               </>
             ) : (
@@ -118,8 +141,11 @@ export default function MemberPortal() {
               </div>
             )}
 
-            <button className="member-reset" onClick={()=>{setMember(null);setMsg("");}}>
-              Buat Semakan Lain
+            <button
+              className="member-reset"
+              onClick={()=>{setMember(null);setMsg("");setMemberId("");setIcLast4("");}}
+            >
+              Log Keluar
             </button>
           </div>
         )}
