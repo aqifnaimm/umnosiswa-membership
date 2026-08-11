@@ -160,7 +160,7 @@ export default function HomePage() {
           <div className="homev3-stat-grid">
             <article><span>Ahli Aktif</span><strong>—</strong><small>Jumlah approved members</small></article>
             <article><span>IPT Terlibat</span><strong>—</strong><small>Institusi dengan ahli berdaftar</small></article>
-            <article><span>Zon IPT</span><strong>6</strong><small>Utara, Tengah, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
+            <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
           </div>
         </div>
       </section>
