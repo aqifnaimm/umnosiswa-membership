@@ -148,6 +148,55 @@ export default function HomePage() {
       </section>
 
 
+
+      <section className="homev3-presiden">
+        <div className="homev3-container">
+          <div className="homev3-presiden-card">
+            <div className="homev3-presiden-image">
+              <Image
+                src="/gallery/ucapan-presiden-umno-2026.jpeg"
+                alt="Perhimpunan Agung UMNO 2026"
+                fill
+                className="homev3-presiden-cover"
+                sizes="(max-width: 900px) 100vw, 44vw"
+              />
+            </div>
+
+            <div className="homev3-presiden-copy">
+              <span className="homev3-kicker">UCAPAN PRESIDEN UMNOSISWA</span>
+              <h2>Selamat Bersidang</h2>
+              <h3>Perhimpunan Agung UMNO 2026</h3>
+
+              <div className="homev3-presiden-line" />
+
+              <p>
+                Selamat bersidang kepada seluruh perwakilan, pimpinan dan keluarga besar
+                UMNO sempena Perhimpunan Agung UMNO 2026.
+              </p>
+
+              <p>
+                Semoga persidangan ini menjadi medan memperkukuh kesatuan, memperteguh
+                perjuangan dan menyusun langkah yang lebih baik demi masa depan parti,
+                generasi muda dan Malaysia.
+              </p>
+
+              <blockquote>
+                “Mempertahankan legasi, memacu masa depan.”
+              </blockquote>
+
+              <div className="homev3-presiden-signoff">
+                <span>Daripada</span>
+                <strong>Presiden UMNOSiswa Malaysia</strong>
+              </div>
+
+              <div className="homev3-presiden-motto">
+                BERSATU • BERSETIA • BERKHIDMAT
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="homev3-card-preview">
         <div className="homev3-container homev3-card-preview-grid">
           <div className="homev3-card-preview-copy">
