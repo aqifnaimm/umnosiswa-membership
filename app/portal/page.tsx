@@ -21,34 +21,28 @@ export default function MemberPortal() {
   const [loading, setLoading] = useState(false);
 
   async function check() {
-    setLoading(true);
-    setMsg("");
-    setMember(null);
-
+    setLoading(true); setMsg(""); setMember(null);
     try {
       const r = await fetch("/api/member/lookup", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-          membership_id: memberId.trim().toUpperCase(),
-          ic_last4: icLast4
-        })
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({membership_id:memberId.trim().toUpperCase(),ic_last4:icLast4})
       });
-
-      const d = await r.json();
-
-      if (!r.ok) {
-        setMsg(d.error || "Rekod tidak ditemui.");
-        return;
-      }
-
+      const d=await r.json();
+      if(!r.ok){setMsg(d.error||"Rekod tidak ditemui.");return}
       setMember(d.member);
-    } catch {
-      setMsg("Tidak dapat berhubung dengan server.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setMsg("Tidak dapat berhubung dengan server."); }
+    finally { setLoading(false); }
   }
+
+  const verifyUrl =
+    typeof window !== "undefined" && member?.membership_id
+      ? `${window.location.origin}/verify/${member.membership_id}`
+      : "";
+
+  const qrUrl = verifyUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(verifyUrl)}`
+    : "";
 
   return (
     <main className="member-portal-shell">
@@ -68,54 +62,46 @@ export default function MemberPortal() {
         {!member && (
           <div className="member-lookup-card">
             <label>ID UMNOSiswa</label>
-            <input
-              value={memberId}
-              onChange={e=>setMemberId(e.target.value.toUpperCase().replace(/\s/g,""))}
-              placeholder="Contoh: US000001"
-              maxLength={8}
-            />
-
+            <input value={memberId} onChange={e=>setMemberId(e.target.value.toUpperCase().replace(/\s/g,""))} placeholder="Contoh: US000001" maxLength={8}/>
             <label>4 digit terakhir No. IC</label>
-            <input
-              value={icLast4}
-              onChange={e=>setIcLast4(e.target.value.replace(/\D/g,"").slice(0,4))}
-              placeholder="Contoh: 1234"
-              inputMode="numeric"
-              maxLength={4}
-            />
-
-            <button
-              disabled={loading || !memberId || icLast4.length !== 4}
-              onClick={check}
-            >
-              {loading ? "Menyemak..." : "Log Masuk →"}
+            <input value={icLast4} onChange={e=>setIcLast4(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="Contoh: 1234" inputMode="numeric" maxLength={4}/>
+            <button disabled={loading||!memberId||icLast4.length!==4} onClick={check}>
+              {loading?"Menyemak...":"Log Masuk →"}
             </button>
-
-            {msg && <div className="member-error">{msg}</div>}
+            {msg&&<div className="member-error">{msg}</div>}
           </div>
         )}
 
         {member && (
           <div className="member-result">
-            {member.status === "approved" && member.membership_id ? (
+            {member.status==="approved" && member.membership_id ? (
               <>
-                <div className="digital-card">
+                <div className="digital-card digital-card-with-qr">
                   <div className="digital-card-top">
                     <div className="digital-logo">
-                      <Image src="/umnos-logo.jpeg" alt="UMNOSiswa" width={230} height={120} />
+                      <Image src="/umnos-logo.jpeg" alt="UMNOSiswa" width={230} height={120}/>
                     </div>
                     <span className="active-chip">ACTIVE</span>
                   </div>
 
-                  <div className="digital-card-body">
-                    <small>KAD KEAHLIAN DIGITAL</small>
-                    <h2>{member.full_name}</h2>
-                    <div className="member-number">{member.membership_id}</div>
+                  <div className="digital-card-main-grid">
+                    <div className="digital-card-body">
+                      <small>KAD KEAHLIAN DIGITAL</small>
+                      <h2>{member.full_name}</h2>
+                      <div className="member-number">{member.membership_id}</div>
+                      <div className="digital-details">
+                        <div><span>IPT</span><strong>{member.ipt_name}</strong></div>
+                        <div><span>ZON IPT</span><strong>{member.ipt_zone}</strong></div>
+                        <div><span>BAHAGIAN UMNO</span><strong>{member.umno_division}</strong></div>
+                      </div>
+                    </div>
 
-                    <div className="digital-details">
-                      <div><span>IPT</span><strong>{member.ipt_name}</strong></div>
-                      <div><span>ZON IPT</span><strong>{member.ipt_zone}</strong></div>
-                      <div><span>BAHAGIAN UMNO</span><strong>{member.umno_division}</strong></div>
+                    <div className="member-qr-area">
+                      <div className="member-qr-box">
+                        {qrUrl && <img src={qrUrl} alt={`QR verification ${member.membership_id}`} />}
+                      </div>
+                      <strong>SCAN TO VERIFY</strong>
+                      <small>{member.membership_id}</small>
                     </div>
                   </div>
 
@@ -124,29 +110,16 @@ export default function MemberPortal() {
                     <a href={`/verify/${member.membership_id}`}>VERIFY →</a>
                   </div>
                 </div>
-
-                <p className="member-note">
-                  Keahlian anda aktif.
-                </p>
+                <p className="member-note">Scan QR untuk pengesahan status keahlian.</p>
               </>
-            ) : (
+            ):(
               <div className="member-status-card">
                 <span className={`member-status-pill ${member.status}`}>{member.status}</span>
                 <h2>{member.full_name}</h2>
-                <p>
-                  {member.status === "pending"
-                    ? "Permohonan anda masih dalam semakan pentadbir."
-                    : "Permohonan anda tidak diluluskan. Sila hubungi pentadbir jika memerlukan semakan lanjut."}
-                </p>
+                <p>{member.status==="pending"?"Permohonan anda masih dalam semakan pentadbir.":"Permohonan anda tidak diluluskan. Sila hubungi pentadbir."}</p>
               </div>
             )}
-
-            <button
-              className="member-reset"
-              onClick={()=>{setMember(null);setMsg("");setMemberId("");setIcLast4("");}}
-            >
-              Log Keluar
-            </button>
+            <button className="member-reset" onClick={()=>{setMember(null);setMsg("");setMemberId("");setIcLast4("");}}>Log Keluar</button>
           </div>
         )}
       </section>
