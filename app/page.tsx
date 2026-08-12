@@ -256,7 +256,7 @@ export default function HomePage() {
           <div>BERSATU • BERSETIA • BERKHIDMAT</div>
           <div>© 2026 UMNOSiswa Malaysia</div>
         </div>
-      </footer>
+      </footer> 
     </main>
   );
 }
