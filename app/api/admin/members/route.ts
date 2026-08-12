@@ -114,10 +114,23 @@ export async function PATCH(req: Request) {
       ic_number: normalizeIC(body.ic_number),
       umno_member_no: normalizeUmnoNo(body.umno_member_no),
       ipt_name: String(body.ipt_name || "").trim(),
+      graduation_month: body.graduation_month ? Number(body.graduation_month) : null,
       graduation_year: Number(body.graduation_year),
       ipt_zone: String(body.ipt_zone || "").trim(),
       umno_division: String(body.umno_division || "").trim()
     };
+
+    if (
+      patch.graduation_month !== null &&
+      (!Number.isInteger(patch.graduation_month) ||
+        patch.graduation_month < 1 ||
+        patch.graduation_month > 12)
+    ) {
+      return NextResponse.json(
+        { error: "Bulan tamat pengajian tidak sah." },
+        { status: 400 }
+      );
+    }
 
     if (
       !patch.full_name ||
@@ -189,6 +202,7 @@ export async function PATCH(req: Request) {
           ic_number: before.ic_number,
           umno_member_no: before.umno_member_no,
           ipt_name: before.ipt_name,
+          graduation_month: before.graduation_month,
           graduation_year: before.graduation_year,
           ipt_zone: before.ipt_zone,
           umno_division: before.umno_division

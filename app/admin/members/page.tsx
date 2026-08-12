@@ -12,6 +12,7 @@ type Member = {
   ic_number: string;
   umno_member_no: string;
   ipt_name: string;
+  graduation_month: number | null;
   graduation_year: number;
   ipt_zone: string;
   umno_division: string;
@@ -21,6 +22,10 @@ type Member = {
 };
 
 const ZONES = ["Utara","Lembah Klang","Selatan","Pantai Timur","Sabah","Sarawak"];
+const MONTHS = [
+  "Januari","Februari","Mac","April","Mei","Jun",
+  "Julai","Ogos","September","Oktober","November","Disember"
+];
 
 export default function MemberManagementPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -130,6 +135,7 @@ export default function MemberManagementPage() {
         ic_number: form.ic_number,
         umno_member_no: form.umno_member_no,
         ipt_name: form.ipt_name,
+        graduation_month: form.graduation_month ? Number(form.graduation_month) : null,
         graduation_year: Number(form.graduation_year),
         ipt_zone: form.ipt_zone,
         umno_division: form.umno_division
@@ -165,6 +171,11 @@ export default function MemberManagementPage() {
   function maskIC(ic: string) {
     const d = String(ic || "").replace(/\D/g, "");
     return d.length >= 4 ? `******-**-${d.slice(-4)}` : "****";
+  }
+
+  function graduationLabel(month: number | null, year: number) {
+    if (!month || month < 1 || month > 12) return `Tamat ${year}`;
+    return `Tamat ${MONTHS[month - 1]} ${year}`;
   }
 
   return (
@@ -252,7 +263,7 @@ export default function MemberManagementPage() {
                     <td>{m.membership_id || "—"}</td>
                     <td>
                       {m.ipt_name}
-                      <small>Tamat {m.graduation_year}</small>
+                      <small>{graduationLabel(m.graduation_month, m.graduation_year)}</small>
                     </td>
                     <td>{m.ipt_zone}</td>
                     <td>{m.umno_division}</td>
@@ -321,6 +332,19 @@ export default function MemberManagementPage() {
               <label>
                 IPT
                 <input value={String(form.ipt_name || "")} onChange={e=>setForm({...form,ipt_name:e.target.value})}/>
+              </label>
+
+              <label>
+                Bulan Tamat
+                <select
+                  value={form.graduation_month ? String(form.graduation_month) : ""}
+                  onChange={e=>setForm({...form,graduation_month:e.target.value ? Number(e.target.value) : null})}
+                >
+                  <option value="">Belum ditetapkan</option>
+                  {MONTHS.map((month,index)=>(
+                    <option key={month} value={index + 1}>{month}</option>
+                  ))}
+                </select>
               </label>
 
               <label>
