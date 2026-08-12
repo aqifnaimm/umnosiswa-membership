@@ -29,7 +29,7 @@ type AdminProfile = {
 export default function AdminPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [profile, setProfile] = useState<AdminProfile | null>(null);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(true);
@@ -63,18 +63,41 @@ export default function AdminPage() {
     setLoading(true);
     setMsg("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password
-    });
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          password
+        })
+      });
 
-    if (error || !data.session) {
+      const result = await res.json();
+
+      if (!res.ok || !result.email) {
+        setMsg(result.error || "Username atau kata laluan tidak sah.");
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: result.email,
+        password
+      });
+
+      if (error || !data.session) {
+        setMsg("Username atau kata laluan tidak sah.");
+        return;
+      }
+
+      setUsername("");
+      setPassword("");
+      await loadMembers(data.session.access_token);
+    } catch {
+      setMsg("Tidak dapat berhubung dengan server.");
+    } finally {
       setLoading(false);
-      setMsg("Email atau kata laluan tidak sah.");
-      return;
     }
-
-    await loadMembers(data.session.access_token);
   }
 
   async function loadMembers(existingToken?: string) {
@@ -217,7 +240,7 @@ export default function AdminPage() {
     await supabase.auth.signOut();
     setProfile(null);
     setMembers([]);
-    setEmail("");
+    setUsername("");
     setPassword("");
     setMsg("");
   }
@@ -267,14 +290,15 @@ export default function AdminPage() {
           <div className="admin-glass-card">
             <div className="admin-lock-icon">🔒</div>
 
-            <label className="admin-field-label">Email Admin</label>
+            <label className="admin-field-label">Username Admin</label>
             <div className="admin-input-wrap">
               <input
                 className="admin-key-input"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="admin@umnosiswa.my"
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                placeholder="Masukkan username"
+                autoComplete="username"
               />
             </div>
 
