@@ -178,6 +178,61 @@ export default function MemberManagementPage() {
     return `Tamat ${MONTHS[month - 1]} ${year}`;
   }
 
+  function exportCSV() {
+    if (!shown.length) {
+      setMsg("Tiada data untuk dieksport berdasarkan filter semasa.");
+      return;
+    }
+
+    const headers = [
+      "Nama Penuh", "ID UMNOSiswa", "No. Ahli UMNO", "Email", "Telefon",
+      "No. IC", "IPT", "Bulan Tamat", "Tahun Tamat", "Zon IPT",
+      "Bahagian UMNO", "Status", "Tarikh Daftar"
+    ];
+
+    const csvEscape = (value: unknown) => {
+      const str = String(value ?? "");
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const rows = shown.map(m => [
+      m.full_name,
+      m.membership_id || "",
+      m.umno_member_no,
+      m.email,
+      m.phone_number,
+      m.ic_number,
+      m.ipt_name,
+      m.graduation_month ? MONTHS[m.graduation_month - 1] : "",
+      m.graduation_year,
+      m.ipt_zone,
+      m.umno_division,
+      m.status,
+      new Date(m.created_at).toLocaleDateString("ms-MY")
+    ]);
+
+    const csv = "\uFEFF" + [headers, ...rows]
+      .map(row => row.map(csvEscape).join(","))
+      .join("\r\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const filterName = [
+      iptFilter !== "all" ? iptFilter : "Semua-IPT",
+      zoneFilter !== "all" ? zoneFilter : "Semua-Zon",
+      statusFilter !== "all" ? statusFilter : "Semua-Status"
+    ].join("_").replace(/[^a-zA-Z0-9_-]+/g, "-");
+
+    a.href = url;
+    a.download = `UMNOSiswa_Ahli_${filterName}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setMsg(`${shown.length} rekod berjaya dieksport.`);
+  }
+
   return (
     <main className="member-admin-shell">
       <div className="member-admin-wrap">
@@ -207,7 +262,10 @@ export default function MemberManagementPage() {
               <h2>Senarai Ahli</h2>
               {me && <small>Logged in: {me.email}</small>}
             </div>
-            <button onClick={load} disabled={loading}>{loading ? "Loading..." : "Refresh"}</button>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              <button onClick={exportCSV} disabled={loading || shown.length === 0}>Export CSV</button>
+              <button onClick={load} disabled={loading}>{loading ? "Loading..." : "Refresh"}</button>
+            </div>
           </div>
 
           <div className="member-admin-filters">
