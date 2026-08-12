@@ -210,7 +210,7 @@ export default function MemberPortal() {
       // Information blocks.
       const info = [
         ["JAWATAN", member.member_position || "Ahli IPT"],
-        ["PERINGKAT", member.position_level === "nasional" ? "Nasional" : "IPT"],
+        ...(member.position_level === "nasional" ? [] : [["PERINGKAT", "IPT"]]),
         ["IPT", member.ipt_name],
         ["STATUS", member.student_status === "alumni" ? "Alumni" : "Pelajar Aktif"],
         ["TAMAT PENGAJIAN", graduationLabel(member.graduation_month, member.graduation_year)],
@@ -363,17 +363,19 @@ export default function MemberPortal() {
                         }}>
                           {member.member_position || "Ahli IPT"}
                         </strong>
-                        <span style={{
-                          padding:"4px 8px",
-                          borderRadius:999,
-                          border:"1px solid rgba(255,255,255,.18)",
-                          color:"rgba(255,255,255,.68)",
-                          fontSize:10,
-                          fontWeight:800,
-                          letterSpacing:".08em"
-                        }}>
-                          {member.position_level === "nasional" ? "NASIONAL" : "IPT"}
-                        </span>
+                        {member.position_level !== "nasional" && (
+                          <span style={{
+                            padding:"4px 8px",
+                            borderRadius:999,
+                            border:"1px solid rgba(255,255,255,.18)",
+                            color:"rgba(255,255,255,.68)",
+                            fontSize:10,
+                            fontWeight:800,
+                            letterSpacing:".08em"
+                          }}>
+                            IPT
+                          </span>
+                        )}
                       </div>
                       <div className="digital-details">
                         <div><span>IPT</span><strong>{member.ipt_name}</strong></div>
@@ -387,7 +389,9 @@ export default function MemberPortal() {
                         </div>
                         <div><span>ZON IPT</span><strong>{member.ipt_zone}</strong></div>
                         <div><span>JAWATAN</span><strong>{member.member_position || "Ahli IPT"}</strong></div>
-                        <div><span>PERINGKAT</span><strong>{member.position_level === "nasional" ? "Nasional" : "IPT"}</strong></div>
+                        {member.position_level !== "nasional" && (
+                          <div><span>PERINGKAT</span><strong>IPT</strong></div>
+                        )}
                         <div><span>BAHAGIAN UMNO</span><strong>{member.umno_division}</strong></div>
                       </div>
                     </div>
