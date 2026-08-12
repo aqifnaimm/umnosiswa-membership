@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 
 type HomeStats = {
   activeMembers: number;
@@ -7,29 +8,54 @@ type HomeStats = {
 };
 
 async function getHomeStats(): Promise<HomeStats> {
-  try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : "http://localhost:3000";
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    const res = await fetch(`${baseUrl}/api/stats`, {
-      next: { revalidate: 60 }
+  if (!url || !serviceKey) {
+    return { activeMembers: 0, institutions: 0 };
+  }
+
+  try {
+    const supabase = createClient(url, serviceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      }
     });
 
-    if (!res.ok) {
+    const { data, error } = await supabase
+      .from("membership_applications")
+      .select("ipt_name")
+      .eq("status", "approved");
+
+    if (error) {
+      console.error("Homepage stats error:", error.message);
       return { activeMembers: 0, institutions: 0 };
     }
 
-    return await res.json();
-  } catch {
+    const rows = data || [];
+
+    const institutions = new Set(
+      rows
+        .map((row) => String(row.ipt_name || "").trim().toLowerCase())
+        .filter(Boolean)
+    ).size;
+
+    return {
+      activeMembers: rows.length,
+      institutions
+    };
+  } catch (error) {
+    console.error("Homepage stats exception:", error);
     return { activeMembers: 0, institutions: 0 };
   }
 }
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const stats = await getHomeStats();
+
   return (
     <main className="homev3-shell">
       <nav className="homev3-nav">
