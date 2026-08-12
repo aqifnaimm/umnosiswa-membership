@@ -217,10 +217,22 @@ export default function RegisterPage() {
             </div>
 
             <div className="field full">
-              <div className="notice">
-                Dengan menghantar borang ini, anda mengesahkan bahawa maklumat yang diberikan
-                adalah benar dan bersetuju data digunakan bagi tujuan pengurusan keahlian UMNOSiswa.
-                Sediakan notis privasi rasmi organisasi sebelum pelancaran awam.
+              <div className="privacy-consent-box">
+                <label className="privacy-consent-row">
+                  <input type="checkbox" name="privacy_consent" required />
+                  <span>
+                    Saya telah membaca dan memahami{" "}
+                    <Link href="/privacy" target="_blank" rel="noopener noreferrer">
+                      Notis Privasi UMNOSiswa Malaysia
+                    </Link>{" "}
+                    dan bersetuju data peribadi saya diproses bagi tujuan pengurusan keahlian,
+                    pengesahan ahli, pentadbiran organisasi, program dan komunikasi berkaitan
+                    keahlian.
+                  </span>
+                </label>
+                <small>
+                  Anda mesti memberikan persetujuan sebelum menghantar permohonan.
+                </small>
               </div>
             </div>
 
