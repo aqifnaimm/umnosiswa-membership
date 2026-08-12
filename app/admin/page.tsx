@@ -373,6 +373,15 @@ export default function AdminPage() {
               >
                 Pengurusan Data Ahli →
               </Link>
+              {profile.role === "super_admin" && (
+                <Link
+                  href="/admin/settings"
+                  className="admin-refresh-btn"
+                  style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}
+                >
+                  System Settings ⚙
+                </Link>
+              )}
               <button className="admin-refresh-btn" onClick={() => loadMembers()} disabled={loading}>Refresh</button>
             </div>
           </div>
