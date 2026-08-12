@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 type Member = {
@@ -268,7 +269,16 @@ export default function AdminPage() {
               <span className="admin-dash-kicker">PENGURUSAN AHLI</span>
               <h2>Permohonan Keahlian</h2>
             </div>
-            <button className="admin-refresh-btn" onClick={() => loadMembers()} disabled={loading}>Refresh</button>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+              <Link
+                href="/admin/members"
+                className="admin-refresh-btn"
+                style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}
+              >
+                Pengurusan Data Ahli →
+              </Link>
+              <button className="admin-refresh-btn" onClick={() => loadMembers()} disabled={loading}>Refresh</button>
+            </div>
           </div>
 
           <div className="admin-toolbar">
