@@ -13,6 +13,166 @@ function normalizeUmnoNo(value: string) {
   return value.trim().toUpperCase().replace(/\s+/g, "");
 }
 
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function maskIC(value: unknown) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  return digits.length >= 4 ? `******-**-${digits.slice(-4)}` : "****";
+}
+
+async function notifyAdminsOfNewApplication(
+  supabase: ReturnType<typeof createClient>,
+  application: any
+) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY belum ditetapkan.");
+  }
+
+  const { data: admins, error: adminError } = await supabase
+    .from("admin_users")
+    .select("email,role,ipt_scope,is_active")
+    .eq("is_active", true);
+
+  if (adminError) throw adminError;
+
+  const applicantIpt = String(application.ipt_name || "").trim().toUpperCase();
+
+  const recipients = Array.from(
+    new Set(
+      (admins || [])
+        .filter((admin: any) => {
+          if (!admin.email) return false;
+          if (admin.role === "super_admin") return true;
+          return (
+            admin.role === "admin" &&
+            String(admin.ipt_scope || "").trim().toUpperCase() === applicantIpt
+          );
+        })
+        .map((admin: any) => String(admin.email).trim().toLowerCase())
+        .filter(Boolean)
+    )
+  );
+
+  if (!recipients.length) {
+    throw new Error(`Tiada pentadbir aktif ditemui untuk IPT ${applicantIpt}.`);
+  }
+
+  const adminUrl = "https://www.umnosiswa.my/admin";
+  const fullName = escapeHtml(application.full_name);
+  const email = escapeHtml(application.email);
+  const phone = escapeHtml(application.phone_number);
+  const ipt = escapeHtml(application.ipt_name);
+  const campus = escapeHtml(application.campus);
+  const umnoNo = escapeHtml(application.umno_member_no);
+  const zone = escapeHtml(application.ipt_zone);
+  const division = escapeHtml(application.umno_division);
+  const graduationMonth = escapeHtml(application.graduation_month);
+  const graduationYear = escapeHtml(application.graduation_year);
+  const icMasked = escapeHtml(maskIC(application.ic_number));
+
+  const html = `
+    <!doctype html>
+    <html lang="ms">
+      <body style="margin:0;padding:0;background:#f4f6f8;font-family:Arial,Helvetica,sans-serif;color:#18202a;">
+        <div style="max-width:680px;margin:0 auto;padding:32px 16px;">
+          <div style="background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e7e9ee;">
+            <div style="background:#071b3a;padding:28px 32px;text-align:center;">
+              <div style="font-size:13px;letter-spacing:2px;font-weight:700;color:#ffffff;">
+                UMNOSISWA MALAYSIA
+              </div>
+              <div style="margin-top:8px;font-size:12px;color:#c8d4e6;">
+                PERMOHONAN KEAHLIAN BAHARU
+              </div>
+            </div>
+
+            <div style="padding:34px 32px;">
+              <h1 style="margin:0 0 14px;font-size:25px;line-height:1.3;color:#071b3a;">
+                Permohonan baharu memerlukan semakan
+              </h1>
+
+              <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#4b5563;">
+                Satu permohonan keahlian UMNOSiswa Malaysia telah diterima dan kini berstatus Dalam Semakan.
+              </p>
+
+              <div style="background:#f7f8fa;border-radius:14px;padding:20px;">
+                <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                  <tr><td style="padding:7px 0;color:#6b7280;width:38%;">Nama</td><td style="padding:7px 0;font-weight:700;">${fullName}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">IPT</td><td style="padding:7px 0;">${ipt}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">Kampus</td><td style="padding:7px 0;">${campus}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">Zon IPT</td><td style="padding:7px 0;">${zone}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">No. Ahli UMNO</td><td style="padding:7px 0;">${umnoNo}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">IC</td><td style="padding:7px 0;">${icMasked}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">E-mel</td><td style="padding:7px 0;">${email}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">Telefon</td><td style="padding:7px 0;">${phone}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">Bahagian UMNO</td><td style="padding:7px 0;">${division}</td></tr>
+                  <tr><td style="padding:7px 0;color:#6b7280;">Tamat Pengajian</td><td style="padding:7px 0;">Bulan ${graduationMonth}, ${graduationYear}</td></tr>
+                </table>
+              </div>
+
+              <div style="text-align:center;margin:28px 0 10px;">
+                <a
+                  href="${adminUrl}"
+                  style="display:inline-block;background:#b5121b;color:#ffffff;text-decoration:none;font-weight:700;padding:14px 24px;border-radius:10px;"
+                >
+                  Semak Permohonan
+                </a>
+              </div>
+
+              <p style="margin:22px 0 0;font-size:12px;line-height:1.7;color:#6b7280;">
+                Log masuk ke Papan Pemuka Pentadbir untuk meluluskan atau menolak permohonan ini.
+              </p>
+            </div>
+
+            <div style="padding:20px 32px;background:#f7f8fa;border-top:1px solid #eceff3;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#7b8492;text-align:center;">
+                Notifikasi automatik Portal Keahlian UMNOSiswa Malaysia.
+              </p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": `new-application/${application.id}`
+    },
+    body: JSON.stringify({
+      from: "UMNOSiswa Malaysia <keahlian@umnosiswa.my>",
+      to: recipients,
+      reply_to: "mahasiswaumno@gmail.com",
+      subject: `Permohonan Baharu UMNOSiswa — ${application.full_name} (${application.ipt_name})`,
+      html
+    })
+  });
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      result?.message ||
+      result?.error ||
+      `Resend gagal menghantar notifikasi (${response.status}).`
+    );
+  }
+
+  return { result, recipients };
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -182,7 +342,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { error } = await supabase
+    const { data: application, error } = await supabase
       .from("membership_applications")
       .insert({
         full_name: String(body.full_name).trim(),
@@ -197,7 +357,9 @@ export async function POST(req: Request) {
         ipt_zone: String(body.ipt_zone).trim(),
         umno_division: String(body.umno_division).trim(),
         status: "pending"
-      });
+      })
+      .select("*")
+      .single();
 
     if (error) {
       // Database unique constraints are the final protection against race conditions.
@@ -217,7 +379,25 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true });
+    let adminNotification = { sent: false, recipients: [] as string[] };
+
+    try {
+      const notification = await notifyAdminsOfNewApplication(supabase, application);
+      adminNotification = {
+        sent: true,
+        recipients: notification.recipients
+      };
+    } catch (notificationError: any) {
+      console.error(
+        "Notifikasi permohonan baharu gagal:",
+        notificationError?.message || notificationError
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      admin_notification: adminNotification
+    });
   } catch (e: any) {
     return NextResponse.json(
       { error: e?.message || "Permintaan tidak sah." },
