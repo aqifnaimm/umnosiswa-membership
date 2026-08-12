@@ -66,9 +66,25 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const websiteStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "UMNOSiswa Malaysia",
+    alternateName: "UMNOSiswa",
+    url: "https://www.umnosiswa.my/",
+  };
+
   return (
     <html lang="ms">
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteStructuredData),
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }
