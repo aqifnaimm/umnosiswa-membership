@@ -13,6 +13,7 @@ type Member = {
   ic_number: string;
   umno_member_no: string;
   ipt_name: string;
+  graduation_month: number | null;
   graduation_year: number;
   ipt_zone: string;
   umno_division: string;
@@ -178,6 +179,16 @@ export default function AdminPage() {
     return d.length >= 4 ? `******-**-${d.slice(-4)}` : "****";
   };
 
+  const graduationLabel = (month: number | null, year: number) => {
+    const months = [
+      "Januari", "Februari", "Mac", "April", "Mei", "Jun",
+      "Julai", "Ogos", "September", "Oktober", "November", "Disember"
+    ];
+
+    if (!month || month < 1 || month > 12) return `Tamat ${year}`;
+    return `Tamat ${months[month - 1]} ${year}`;
+  };
+
   if (!profile) {
     return (
       <main className="admin-login-shell">
@@ -307,7 +318,7 @@ export default function AdminPage() {
                     <td><strong>{m.full_name}</strong><small>{m.email}</small></td>
                     <td>{mask(m.ic_number)}</td>
                     <td>{m.umno_member_no}</td>
-                    <td>{m.ipt_name}<small>Tamat {m.graduation_year}</small></td>
+                    <td>{m.ipt_name}<small>{graduationLabel(m.graduation_month, m.graduation_year)}</small></td>
                     <td>{m.ipt_zone}</td>
                     <td>{m.umno_division}</td>
                     <td><span className={`admin-status ${m.status}`}>{m.status}</span></td>
