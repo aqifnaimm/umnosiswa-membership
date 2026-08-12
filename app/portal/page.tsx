@@ -133,7 +133,10 @@ export default function MemberPortal() {
                     <a href={`/verify/${member.membership_id}`}>VERIFY →</a>
                   </div>
                 </div>
-                <p className="member-note">Scan QR untuk pengesahan status keahlian.</p>
+                <p className="member-note">Scan QR untuk pengesahan status keahlian rasmi.</p>
+                <a className="member-verify-direct" href={`/verify/${member.membership_id}`}>
+                  Buka Halaman Pengesahan →
+                </a>
               </>
             ):(
               <div className="member-status-card">
