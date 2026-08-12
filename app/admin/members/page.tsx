@@ -35,6 +35,7 @@ export default function MemberManagementPage() {
   const [zoneFilter, setZoneFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [studentStatusFilter, setStudentStatusFilter] = useState("all");
+  const [graduationFilter, setGraduationFilter] = useState("all");
   const [editing, setEditing] = useState<Member | null>(null);
   const [form, setForm] = useState<Partial<Member>>({});
   const [msg, setMsg] = useState("");
@@ -109,10 +110,15 @@ export default function MemberManagementPage() {
         (iptFilter === "all" || m.ipt_name === iptFilter) &&
         (zoneFilter === "all" || m.ipt_zone === zoneFilter) &&
         (statusFilter === "all" || m.status === statusFilter) &&
-        (studentStatusFilter === "all" || studentStatus(m) === studentStatusFilter)
+        (studentStatusFilter === "all" || studentStatus(m) === studentStatusFilter) &&
+        (
+          graduationFilter === "all" ||
+          (graduationFilter === "next6" && isGraduatingSoon(m)) ||
+          (graduationFilter === "thisYear" && m.graduation_year === new Date().getFullYear())
+        )
       );
     });
-  }, [members, search, iptFilter, zoneFilter, statusFilter, studentStatusFilter]);
+  }, [members, search, iptFilter, zoneFilter, statusFilter, studentStatusFilter, graduationFilter]);
 
   function openEdit(m: Member) {
     setEditing(m);
@@ -197,6 +203,22 @@ export default function MemberManagementPage() {
       : "active_student";
   }
 
+  function monthsUntilGraduation(m: Member) {
+    const now = new Date();
+    const currentIndex = now.getFullYear() * 12 + now.getMonth();
+    const graduationMonth =
+      m.graduation_month && m.graduation_month >= 1 && m.graduation_month <= 12
+        ? m.graduation_month
+        : 12;
+    const graduationIndex = m.graduation_year * 12 + (graduationMonth - 1);
+    return graduationIndex - currentIndex;
+  }
+
+  function isGraduatingSoon(m: Member) {
+    const months = monthsUntilGraduation(m);
+    return studentStatus(m) === "active_student" && months >= 0 && months <= 6;
+  }
+
   function exportCSV() {
     if (!shown.length) {
       setMsg("Tiada data untuk dieksport berdasarkan filter semasa.");
@@ -206,7 +228,7 @@ export default function MemberManagementPage() {
     const headers = [
       "Nama Penuh", "ID UMNOSiswa", "No. Ahli UMNO", "Email", "Telefon",
       "No. IC", "IPT", "Bulan Tamat", "Tahun Tamat", "Zon IPT",
-      "Bahagian UMNO", "Status Kelulusan", "Status Pelajar", "Tarikh Daftar"
+      "Bahagian UMNO", "Status Kelulusan", "Status Pelajar", "Bulan Ke Tamat", "Tarikh Daftar"
     ];
 
     const csvEscape = (value: unknown) => {
@@ -228,6 +250,7 @@ export default function MemberManagementPage() {
       m.umno_division,
       m.status,
       studentStatus(m) === "alumni" ? "Alumni" : "Active Student",
+      studentStatus(m) === "alumni" ? "" : Math.max(0, monthsUntilGraduation(m)),
       new Date(m.created_at).toLocaleDateString("ms-MY")
     ]);
 
@@ -242,7 +265,8 @@ export default function MemberManagementPage() {
       iptFilter !== "all" ? iptFilter : "Semua-IPT",
       zoneFilter !== "all" ? zoneFilter : "Semua-Zon",
       statusFilter !== "all" ? statusFilter : "Semua-Status",
-      studentStatusFilter !== "all" ? studentStatusFilter : "Semua-Status-Pelajar"
+      studentStatusFilter !== "all" ? studentStatusFilter : "Semua-Status-Pelajar",
+      graduationFilter !== "all" ? graduationFilter : "Semua-Tarikh-Tamat"
     ].join("_").replace(/[^a-zA-Z0-9_-]+/g, "-");
 
     a.href = url;
@@ -253,6 +277,11 @@ export default function MemberManagementPage() {
     URL.revokeObjectURL(url);
     setMsg(`${shown.length} rekod berjaya dieksport.`);
   }
+
+  const activeStudents = members.filter(m => studentStatus(m) === "active_student").length;
+  const alumniCount = members.filter(m => studentStatus(m) === "alumni").length;
+  const graduatingSoon = members.filter(isGraduatingSoon).length;
+  const graduatingThisYear = members.filter(m => m.graduation_year === new Date().getFullYear()).length;
 
   return (
     <main className="member-admin-shell">
@@ -270,10 +299,10 @@ export default function MemberManagementPage() {
         </header>
 
         <section className="member-admin-stats">
-          <div><span>Jumlah Rekod</span><strong>{members.length}</strong></div>
-          <div><span>Hasil Carian</span><strong>{shown.length}</strong></div>
-          <div><span>IPT</span><strong>{ipts.length}</strong></div>
-          <div><span>Approved</span><strong>{members.filter(m=>m.status==="approved").length}</strong></div>
+          <div><span>Active Student</span><strong>{activeStudents}</strong></div>
+          <div><span>Alumni</span><strong>{alumniCount}</strong></div>
+          <div><span>Tamat ≤ 6 Bulan</span><strong>{graduatingSoon}</strong></div>
+          <div><span>Tamat Tahun Ini</span><strong>{graduatingThisYear}</strong></div>
         </section>
 
         <section className="member-admin-card">
@@ -318,9 +347,29 @@ export default function MemberManagementPage() {
               <option value="active_student">Active Student</option>
               <option value="alumni">Alumni</option>
             </select>
+
+            <select value={graduationFilter} onChange={e=>setGraduationFilter(e.target.value)}>
+              <option value="all">Semua Tarikh Tamat</option>
+              <option value="next6">Akan Tamat ≤ 6 Bulan</option>
+              <option value="thisYear">Tamat Tahun Ini</option>
+            </select>
           </div>
 
           {msg && <div className="member-admin-msg">{msg}</div>}
+
+          <div style={{
+            margin:"12px 0 18px",
+            padding:"14px 16px",
+            borderRadius:12,
+            background:"#fff7ed",
+            border:"1px solid #fed7aa",
+            color:"#9a3412",
+            fontSize:12,
+            lineHeight:1.6
+          }}>
+            <strong>Auto Alumni:</strong> Status dikira automatik berdasarkan bulan dan tahun tamat pengajian.
+            Rekod lama tanpa bulan menggunakan Disember sebagai fallback.
+          </div>
 
           <div className="member-admin-table-wrap">
             <table className="member-admin-table">
@@ -350,6 +399,11 @@ export default function MemberManagementPage() {
                     <td>
                       {m.ipt_name}
                       <small>{graduationLabel(m.graduation_month, m.graduation_year)}</small>
+                      {isGraduatingSoon(m) && (
+                        <small style={{color:"#b45309",fontWeight:700}}>
+                          Akan tamat dalam {monthsUntilGraduation(m)} bulan
+                        </small>
+                      )}
                     </td>
                     <td>{m.ipt_zone}</td>
                     <td>{m.umno_division}</td>
