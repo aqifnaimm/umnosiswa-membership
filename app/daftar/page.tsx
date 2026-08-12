@@ -3,7 +3,27 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
-const zones = ["Utara", "Lembah Klang", "Selatan", "Pantai Timur", "Sabah", "Sarawak"];
+const ipts = [
+  { name: "UM", zone: "Lembah Klang" },
+  { name: "UKM", zone: "Lembah Klang" },
+  { name: "UMPSA", zone: "Pantai Timur" },
+  { name: "UMK", zone: "Pantai Timur" },
+  { name: "UNIMAP", zone: "Utara" },
+  { name: "UNISZA", zone: "Pantai Timur" },
+  { name: "USIM", zone: "Lembah Klang" },
+  { name: "UNIKL", zone: "Lembah Klang" },
+  { name: "UITM", zone: "Lembah Klang" },
+  { name: "UTHM", zone: "Selatan" },
+  { name: "UPSI", zone: "Lembah Klang" },
+  { name: "USM", zone: "Utara" },
+  { name: "UPM", zone: "Lembah Klang" },
+  { name: "UUM", zone: "Utara" },
+  { name: "UTEM", zone: "Selatan" },
+  { name: "UMT", zone: "Pantai Timur" },
+  { name: "UMS", zone: "Sabah" },
+  { name: "UIAM", zone: "Lembah Klang" }
+].sort((a, b) => a.name.localeCompare(b.name));
+
 const months = [
   "Januari", "Februari", "Mac", "April", "Mei", "Jun",
   "Julai", "Ogos", "September", "Oktober", "November", "Disember"
@@ -17,6 +37,7 @@ export default function RegisterPage() {
   const [registrationOpen, setRegistrationOpen] = useState(true);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState("Sistem sedang diselenggara. Sila cuba sebentar lagi.");
+  const [selectedIpt, setSelectedIpt] = useState("");
 
   useEffect(() => {
     fetch("/api/settings")
@@ -56,6 +77,7 @@ export default function RegisterPage() {
       if (!res.ok) throw new Error(data.error || "Pendaftaran gagal.");
       setMessage("Permohonan berjaya dihantar. Status anda kini Pending.");
       e.currentTarget.reset();
+      setSelectedIpt("");
     } catch (err: any) {
       setError(err.message || "Pendaftaran gagal.");
     } finally {
@@ -138,7 +160,17 @@ export default function RegisterPage() {
 
             <div className="field full">
               <label>Institusi Pengajian Tinggi (IPT)</label>
-              <input name="ipt_name" required placeholder="Contoh: IIUM / UIAM" />
+              <select
+                name="ipt_name"
+                required
+                value={selectedIpt}
+                onChange={e => setSelectedIpt(e.target.value)}
+              >
+                <option value="" disabled>Pilih IPT</option>
+                {ipts.map(ipt => (
+                  <option key={ipt.name} value={ipt.name}>{ipt.name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="field">
@@ -158,10 +190,16 @@ export default function RegisterPage() {
 
             <div className="field">
               <label>Zon IPT</label>
-              <select name="ipt_zone" required defaultValue="">
-                <option value="" disabled>Pilih zon</option>
-                {zones.map(z => <option key={z} value={z}>{z}</option>)}
-              </select>
+              <input
+                value={ipts.find(ipt => ipt.name === selectedIpt)?.zone || ""}
+                placeholder="Auto ikut IPT"
+                readOnly
+              />
+              <input
+                type="hidden"
+                name="ipt_zone"
+                value={ipts.find(ipt => ipt.name === selectedIpt)?.zone || ""}
+              />
             </div>
 
             <div className="field full">
