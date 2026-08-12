@@ -8,6 +8,7 @@ type Admin = {
   id: string;
   auth_user_id: string;
   email: string;
+  username: string | null;
   role: "super_admin" | "admin";
   is_active: boolean;
   created_at: string;
@@ -16,7 +17,7 @@ type Admin = {
 export default function AdminManagementPage() {
   const [admins,setAdmins]=useState<Admin[]>([]);
   const [me,setMe]=useState<any>(null);
-  const [email,setEmail]=useState("");
+  const [username,setUsername]=useState("");
   const [password,setPassword]=useState("");
   const [role,setRole]=useState<"admin"|"super_admin">("admin");
   const [msg,setMsg]=useState("");
@@ -40,8 +41,8 @@ export default function AdminManagementPage() {
   useEffect(()=>{load()},[]);
 
   async function createAdmin(){
-    if(!email || password.length<8) {
-      setMsg("Masukkan email dan kata laluan sekurang-kurangnya 8 aksara.");
+    if(!username.trim() || password.length<8) {
+      setMsg("Masukkan username dan kata laluan sekurang-kurangnya 8 aksara.");
       return;
     }
     setLoading(true); setMsg("");
@@ -49,11 +50,11 @@ export default function AdminManagementPage() {
     const r=await fetch("/api/admin/users",{
       method:"POST",
       headers:{"Content-Type":"application/json",Authorization:`Bearer ${t}`},
-      body:JSON.stringify({email:email.trim().toLowerCase(),password,role})
+      body:JSON.stringify({username:username.trim().toLowerCase(),password,role})
     });
     const d=await r.json();
     if(!r.ok){setMsg(d.error||"Gagal tambah admin.");setLoading(false);return;}
-    setEmail("");setPassword("");setRole("admin");
+    setUsername("");setPassword("");setRole("admin");
     setMsg("Admin baru berjaya ditambah.");
     await load();
   }
@@ -91,7 +92,7 @@ export default function AdminManagementPage() {
           <h2>Tambah Admin Baru</h2>
         </div>
         <div className="admin-create-grid">
-          <input type="email" placeholder="Email admin" value={email} onChange={e=>setEmail(e.target.value)}/>
+          <input type="text" placeholder="Username admin" value={username} onChange={e=>setUsername(e.target.value)} autoComplete="username"/>
           <input type="password" placeholder="Kata laluan sementara" value={password} onChange={e=>setPassword(e.target.value)}/>
           <select value={role} onChange={e=>setRole(e.target.value as any)}>
             <option value="admin">Admin</option>
@@ -109,10 +110,10 @@ export default function AdminManagementPage() {
 
         <div className="admin-manage-table-wrap">
           <table className="admin-manage-table">
-            <thead><tr><th>Email</th><th>Role</th><th>Status</th><th>Dicipta</th><th>Tindakan</th></tr></thead>
+            <thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Dicipta</th><th>Tindakan</th></tr></thead>
             <tbody>
               {admins.map(a=><tr key={a.id}>
-                <td><strong>{a.email}</strong>{a.auth_user_id===me?.userId&&<small> Akaun anda</small>}</td>
+                <td><strong>{a.username || "—"}</strong>{a.auth_user_id===me?.userId&&<small> Akaun anda</small>}</td>
                 <td><span className={`admin-role-chip ${a.role}`}>{a.role==="super_admin"?"Super Admin":"Admin"}</span></td>
                 <td><span className={`admin-account-status ${a.is_active?"on":"off"}`}>{a.is_active?"Aktif":"Tidak Aktif"}</span></td>
                 <td>{new Date(a.created_at).toLocaleDateString("ms-MY")}</td>
