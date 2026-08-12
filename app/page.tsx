@@ -192,7 +192,7 @@ export default function HomePage() {
                 <div className="homev3-card-details">
                   <div><span>IPT</span><strong>IIUM / UIAM</strong></div>
                   <div><span>ZON IPT</span><strong>Lembah Klang</strong></div>
-                  <div><span>BAHAGIAN UMNO</span><strong>Gombak</strong></div>
+                  <div><span>BAHAGIAN UMNO</span><strong>Lumut</strong></div>
                 </div>
               </div>
 
