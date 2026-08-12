@@ -410,7 +410,29 @@ export default async function HomePage() {
             <small>Portal Keahlian Digital</small>
           </div>
           <div>{settings.motto}</div>
-          <div>© 2026 {settings.org_name}</div>
+          <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+            <div>© 2026 {settings.org_name}</div>
+            <Link
+              href="/admin"
+              aria-label="Akses Pentadbir"
+              style={{
+                display:"inline-flex",
+                alignItems:"center",
+                justifyContent:"center",
+                minHeight:34,
+                padding:"0 12px",
+                border:"1px solid rgba(255,255,255,.12)",
+                borderRadius:9,
+                background:"rgba(255,255,255,.05)",
+                color:"rgba(255,255,255,.62)",
+                fontSize:11,
+                fontWeight:800,
+                letterSpacing:".04em"
+              }}
+            >
+              Pentadbir
+            </Link>
+          </div>
         </div>
       </footer> 
     </main>
