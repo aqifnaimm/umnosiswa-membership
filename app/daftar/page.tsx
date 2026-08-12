@@ -173,6 +173,15 @@ export default function RegisterPage() {
               </select>
             </div>
 
+            <div className="field full">
+              <label>Kampus</label>
+              <input
+                name="campus"
+                required
+                placeholder="Contoh: Kampus Gombak / Kampus Bangi / Kampus Pagoh"
+              />
+            </div>
+
             <div className="field">
               <label>Bulan Tamat Pengajian</label>
               <select name="graduation_month" required defaultValue="">
