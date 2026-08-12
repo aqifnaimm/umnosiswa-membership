@@ -27,6 +27,12 @@ export default function AdminManagementPage() {
   const [iptScope,setIptScope]=useState("UIAM");
   const [msg,setMsg]=useState("");
   const [loading,setLoading]=useState(true);
+  const [editing,setEditing]=useState<Admin|null>(null);
+  const [editUsername,setEditUsername]=useState("");
+  const [editEmail,setEditEmail]=useState("");
+  const [editPassword,setEditPassword]=useState("");
+  const [editRole,setEditRole]=useState<"admin"|"super_admin">("admin");
+  const [editIptScope,setEditIptScope]=useState("UIAM");
 
   async function token(){
     const {data}=await supabase.auth.getSession();
@@ -75,18 +81,100 @@ export default function AdminManagementPage() {
     await load();
   }
 
+  async function deleteAdmin(a: Admin){
+    if(me?.role!=="super_admin") return;
+
+    if(a.auth_user_id===me?.userId){
+      setMsg("Anda tidak boleh membuang akaun Pentadbir Utama yang sedang digunakan.");
+      return;
+    }
+
+    const label=a.username || a.email || "pentadbir ini";
+    if(!confirm(`Anda pasti mahu membuang ${label}?\n\nAkaun pentadbir ini akan dipadam dan tindakan ini tidak boleh dibatalkan.`)) return;
+
+    setLoading(true); setMsg("");
+    const t=await token();
+
+    try{
+      const r=await fetch("/api/admin/users",{
+        method:"DELETE",
+        headers:{"Content-Type":"application/json",Authorization:`Bearer ${t}`},
+        body:JSON.stringify({id:a.id})
+      });
+      const d=await r.json();
+      if(!r.ok){
+        setMsg(d.error||"Gagal membuang pentadbir.");
+        setLoading(false);
+        return;
+      }
+      setMsg(`Pentadbir ${label} berjaya dibuang.`);
+      await load();
+    }catch{
+      setMsg("Tidak dapat membuang pentadbir.");
+      setLoading(false);
+    }
+  }
+
   async function updateAdmin(id:string, patch:any){
     setLoading(true);setMsg("");
     const t=await token();
-    const r=await fetch(`/api/admin/users/${id}`,{
+    const r=await fetch("/api/admin/users",{
       method:"PATCH",
       headers:{"Content-Type":"application/json",Authorization:`Bearer ${t}`},
-      body:JSON.stringify(patch)
+      body:JSON.stringify({id,...patch})
     });
     const d=await r.json();
     if(!r.ok){setMsg(d.error||"Gagal mengemas kini pentadbir.");setLoading(false);return;}
     setMsg("Pentadbir berjaya dikemas kini.");
     await load();
+  }
+
+  function openEditAdmin(a:Admin){
+    setEditing(a);
+    setEditUsername(a.username||"");
+    setEditEmail(a.email||"");
+    setEditPassword("");
+    setEditRole(a.role);
+    setEditIptScope(a.ipt_scope||"UIAM");
+    setMsg("");
+  }
+
+  async function saveAdminDetails(){
+    if(!editing)return;
+
+    const cleanUsername=editUsername.trim().toLowerCase();
+    const cleanEmail=editEmail.trim().toLowerCase();
+
+    if(!/^[a-z0-9._-]{3,32}$/.test(cleanUsername)){
+      setMsg("Nama pengguna mesti 3–32 aksara dan hanya boleh mengandungi huruf kecil, nombor, titik, garis bawah atau tanda sempang.");
+      return;
+    }
+
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)){
+      setMsg("Masukkan alamat e-mel pentadbir yang sah.");
+      return;
+    }
+
+    if(editPassword && editPassword.length<8){
+      setMsg("Kata laluan baharu mesti sekurang-kurangnya 8 aksara.");
+      return;
+    }
+
+    if(editRole==="admin" && !editIptScope){
+      setMsg("Sila pilih IPT untuk Pentadbir IPT.");
+      return;
+    }
+
+    await updateAdmin(editing.id,{
+      username:cleanUsername,
+      email:cleanEmail,
+      password:editPassword||undefined,
+      role:editRole,
+      ipt_scope:editRole==="admin"?editIptScope:null
+    });
+
+    setEditing(null);
+    setEditPassword("");
   }
 
   return <main className="admin-manage-shell">
@@ -173,9 +261,25 @@ export default function AdminManagementPage() {
                       <option value="super_admin">Pentadbir Utama</option>
                     </select>
                     <button
+                      disabled={loading}
+                      onClick={()=>openEditAdmin(a)}>
+                      Edit
+                    </button>
+                    <button
                       disabled={a.auth_user_id===me.userId || loading}
                       onClick={()=>updateAdmin(a.id,{is_active:!a.is_active})}>
                       {a.is_active?"Nyahaktif":"Aktifkan"}
+                    </button>
+                    <button
+                      disabled={a.auth_user_id===me.userId || loading}
+                      onClick={()=>deleteAdmin(a)}
+                      style={{
+                        border:"1px solid #fecaca",
+                        background:"#fff1f2",
+                        color:"#b91c1c",
+                        fontWeight:700
+                      }}>
+                      Buang
                     </button>
                   </div> : "—"}
                 </td>
@@ -185,5 +289,84 @@ export default function AdminManagementPage() {
         </div>
       </section>
     </div>
+
+    {editing && (
+      <div
+        style={{
+          position:"fixed",inset:0,background:"rgba(3,12,28,.62)",
+          display:"flex",alignItems:"center",justifyContent:"center",
+          padding:20,zIndex:9999
+        }}
+        onMouseDown={()=>setEditing(null)}
+      >
+        <div
+          style={{
+            width:"min(620px,100%)",background:"#fff",borderRadius:18,
+            padding:24,boxShadow:"0 24px 80px rgba(0,0,0,.28)"
+          }}
+          onMouseDown={e=>e.stopPropagation()}
+        >
+          <div style={{display:"flex",justifyContent:"space-between",gap:16,alignItems:"flex-start",marginBottom:18}}>
+            <div>
+              <span className="admin-manage-kicker">SUNTING PENTADBIR</span>
+              <h2 style={{margin:"6px 0 0"}}>{editing.username || editing.email}</h2>
+            </div>
+            <button onClick={()=>setEditing(null)} style={{fontSize:20}}>×</button>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:14}}>
+            <label style={{display:"grid",gap:6}}>
+              Nama Pengguna
+              <input value={editUsername} onChange={e=>setEditUsername(e.target.value)} />
+            </label>
+
+            <label style={{display:"grid",gap:6}}>
+              E-mel Pentadbir
+              <input type="email" value={editEmail} onChange={e=>setEditEmail(e.target.value)} />
+            </label>
+
+            <label style={{display:"grid",gap:6}}>
+              Kata Laluan Baharu
+              <input
+                type="password"
+                value={editPassword}
+                onChange={e=>setEditPassword(e.target.value)}
+                placeholder="Kosongkan jika tidak mahu tukar"
+              />
+            </label>
+
+            <label style={{display:"grid",gap:6}}>
+              Peranan
+              <select value={editRole} onChange={e=>setEditRole(e.target.value as "admin"|"super_admin")}>
+                <option value="admin">Pentadbir IPT</option>
+                <option value="super_admin">Pentadbir Utama</option>
+              </select>
+            </label>
+
+            <label style={{display:"grid",gap:6,gridColumn:"1 / -1"}}>
+              Skop IPT
+              {editRole==="admin" ? (
+                <select value={editIptScope} onChange={e=>setEditIptScope(e.target.value)}>
+                  {IPTS.map(ipt=><option key={ipt} value={ipt}>{ipt}</option>)}
+                </select>
+              ) : (
+                <input value="Semua IPT" disabled />
+              )}
+            </label>
+          </div>
+
+          <p style={{fontSize:12,opacity:.68,lineHeight:1.6,margin:"16px 0"}}>
+            Kosongkan ruangan kata laluan jika anda tidak mahu menukarnya.
+          </p>
+
+          <div style={{display:"flex",justifyContent:"flex-end",gap:10}}>
+            <button onClick={()=>setEditing(null)} disabled={loading}>Batal</button>
+            <button onClick={saveAdminDetails} disabled={loading}>
+              {loading ? "Menyimpan..." : "Simpan Perubahan"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </main>
 }
