@@ -206,7 +206,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <ScrollReveal className="homev3-reveal-section">\n      <section id="tentang" className="homev3-about">
+      <ScrollReveal className="homev3-reveal-section">
+      <section id="tentang" className="homev3-about">
         <div className="homev3-container homev3-about-grid">
           <div className="homev3-about-copy">
             <span className="homev3-kicker">TENTANG UMNOSISWA</span>
@@ -243,9 +244,11 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>\n      </ScrollReveal>
+      </section>
+      </ScrollReveal>
 
-      <ScrollReveal className="homev3-reveal-section">\n      <section id="aktiviti" className="homev3-activity">
+      <ScrollReveal className="homev3-reveal-section">
+      <section id="aktiviti" className="homev3-activity">
         <div className="homev3-container homev3-activity-grid">
           <div className="homev3-activity-image">
             <Image
@@ -277,10 +280,12 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>\n      </ScrollReveal>
+      </section>
+      </ScrollReveal>
 
 
-      <ScrollReveal className="homev3-reveal-section">\n      <section className="homev3-card-preview">
+      <ScrollReveal className="homev3-reveal-section">
+      <section className="homev3-card-preview">
         <div className="homev3-container homev3-card-preview-grid">
           <div className="homev3-card-preview-copy">
             <span className="homev3-kicker">KAD AHLI DIGITAL</span>
@@ -343,7 +348,8 @@ export default async function HomePage() {
             <div className="homev3-card-shadow-card" />
           </div>
         </div>
-      </section>\n      </ScrollReveal>
+      </section>
+      </ScrollReveal>
 
       <ScrollReveal className="homev3-reveal-section">
         <section id="semakan" className="homev3-membership-check-section">
@@ -358,7 +364,8 @@ export default async function HomePage() {
         </section>
       </ScrollReveal>
 
-      <ScrollReveal className="homev3-reveal-section">\n      <section id="statistik" className="homev3-stats">
+      <ScrollReveal className="homev3-reveal-section">
+      <section id="statistik" className="homev3-stats">
         <div className="homev3-container">
           <div className="homev3-section-head">
             <span className="homev3-kicker">STATISTIK KEAHLIAN</span>
@@ -375,9 +382,11 @@ export default async function HomePage() {
             <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
           </div>
         </div>
-      </section>\n      </ScrollReveal>
+      </section>
+      </ScrollReveal>
 
-      <ScrollReveal className="homev3-reveal-section">\n      <section id="pendaftaran" className="homev3-cta">
+      <ScrollReveal className="homev3-reveal-section">
+      <section id="pendaftaran" className="homev3-cta">
         <div className="homev3-container">
           <div className="homev3-cta-card">
             <div>
@@ -391,7 +400,8 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-      </section>\n      </ScrollReveal>
+      </section>
+      </ScrollReveal>
 
       <footer className="homev3-footer">
         <div className="homev3-container homev3-footer-inner">
