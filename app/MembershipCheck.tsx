@@ -87,7 +87,7 @@ export default function MembershipCheck({
             <div><span>Kampus</span><strong>{result.campus || "—"}</strong></div>
             <div><span>Zon IPT</span><strong>{result.ipt_zone || "—"}</strong></div>
             <div><span>Bahagian UMNO</span><strong>{result.umno_division || "—"}</strong></div>
-            <div><span>Status</span><strong>{result.student_status === "alumni" ? "Alumni" : "Active Student"}</strong></div>
+            <div><span>Status</span><strong>{result.student_status === "alumni" ? "Alumni" : "Pelajar Aktif"}</strong></div>
           </div>
           {result.membership_id && (
             <Link href={`/verify/${result.membership_id}`} className="homev3-check-link">

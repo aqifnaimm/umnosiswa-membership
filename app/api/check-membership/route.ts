@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ found: true, status: "rejected" });
   } catch (e: any) {
-    console.error("Membership check error:", e?.message || e);
+    console.error("Ralat semakan keahlian:", e?.message || e);
     return NextResponse.json(
       { error: "Semakan keahlian tidak dapat dilakukan buat masa ini." },
       { status: 500 }

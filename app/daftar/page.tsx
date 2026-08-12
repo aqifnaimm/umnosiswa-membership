@@ -76,7 +76,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error || "Pendaftaran gagal.");
-      setMessage("Permohonan berjaya dihantar. Status anda kini Pending.");
+      setMessage("Permohonan berjaya dihantar. Status anda kini Dalam Semakan.");
       formElement.reset();
       setSelectedIpt("");
     } catch (err: any) {
@@ -145,7 +145,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="field">
-              <label>Email</label>
+              <label>E-mel</label>
               <input name="email" type="email" required />
             </div>
 

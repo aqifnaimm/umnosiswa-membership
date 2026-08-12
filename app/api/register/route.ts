@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (settingsError) {
-      console.error("Registration settings check failed:", settingsError.message);
+      console.error("Semakan tetapan pendaftaran gagal:", settingsError.message);
       return NextResponse.json(
         { error: "Tidak dapat menyemak status pendaftaran buat masa ini." },
         { status: 503 }

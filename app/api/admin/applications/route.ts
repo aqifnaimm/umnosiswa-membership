@@ -48,7 +48,7 @@ async function requireAdmin(req: Request) {
 function scopeError(admin: any) {
   return admin.role === "admin" && !admin.ipt_scope
     ? NextResponse.json(
-        { error: "Akaun admin ini belum ditetapkan skop IPT. Hubungi Super Admin." },
+        { error: "Akaun pentadbir ini belum ditetapkan skop IPT. Hubungi Pentadbir Utama." },
         { status: 403 }
       )
     : null;
@@ -127,7 +127,7 @@ export async function PATCH(req: Request) {
 
     if (!pendingRows?.length) {
       return NextResponse.json(
-        { error: "Tiada permohonan pending dalam skop IPT anda yang sah dipilih." },
+        { error: "Tiada permohonan dalam semakan yang sah dipilih dalam skop IPT anda." },
         { status: 400 }
       );
     }
@@ -168,7 +168,7 @@ export async function PATCH(req: Request) {
         .from("admin_audit_log")
         .insert(auditRows);
 
-      if (auditError) console.error("Bulk audit log error:", auditError.message);
+      if (auditError) console.error("Ralat log audit pukal:", auditError.message);
     }
 
     return NextResponse.json({

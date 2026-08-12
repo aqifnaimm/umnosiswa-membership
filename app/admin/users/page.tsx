@@ -42,7 +42,7 @@ export default function AdminManagementPage() {
 
   async function createAdmin(){
     if(!username.trim() || password.length<8) {
-      setMsg("Masukkan username dan kata laluan sekurang-kurangnya 8 aksara.");
+      setMsg("Masukkan nama pengguna dan kata laluan sekurang-kurangnya 8 aksara.");
       return;
     }
     setLoading(true); setMsg("");
@@ -53,9 +53,9 @@ export default function AdminManagementPage() {
       body:JSON.stringify({username:username.trim().toLowerCase(),password,role})
     });
     const d=await r.json();
-    if(!r.ok){setMsg(d.error||"Gagal tambah admin.");setLoading(false);return;}
+    if(!r.ok){setMsg(d.error||"Gagal menambah pentadbir.");setLoading(false);return;}
     setUsername("");setPassword("");setRole("admin");
-    setMsg("Admin baru berjaya ditambah.");
+    setMsg("Pentadbir baharu berjaya ditambah.");
     await load();
   }
 
@@ -68,8 +68,8 @@ export default function AdminManagementPage() {
       body:JSON.stringify(patch)
     });
     const d=await r.json();
-    if(!r.ok){setMsg(d.error||"Gagal kemaskini admin.");setLoading(false);return;}
-    setMsg("Admin berjaya dikemaskini.");
+    if(!r.ok){setMsg(d.error||"Gagal mengemas kini pentadbir.");setLoading(false);return;}
+    setMsg("Pentadbir berjaya dikemas kini.");
     await load();
   }
 
@@ -78,56 +78,56 @@ export default function AdminManagementPage() {
       <div className="admin-manage-nav">
         <div>
           <span>UMNOSISWA MALAYSIA</span>
-          <h1>Pengurusan Admin</h1>
-          <p>Tambah admin, tetapkan role dan aktif/nonaktif akaun.</p>
+          <h1>Pengurusan Pentadbir</h1>
+          <p>Tambah pentadbir, tetapkan peranan dan aktifkan atau nyahaktifkan akaun.</p>
         </div>
-        <Link href="/admin">← Dashboard</Link>
+        <Link href="/admin">← Papan Pemuka</Link>
       </div>
 
       {msg && <div className="admin-manage-msg">{msg}</div>}
 
       {me?.role==="super_admin" && <section className="admin-create-box">
         <div>
-          <span className="admin-manage-kicker">SUPER ADMIN</span>
-          <h2>Tambah Admin Baru</h2>
+          <span className="admin-manage-kicker">PENTADBIR UTAMA</span>
+          <h2>Tambah Pentadbir Baharu</h2>
         </div>
         <div className="admin-create-grid">
-          <input type="text" placeholder="Username admin" value={username} onChange={e=>setUsername(e.target.value)} autoComplete="username"/>
+          <input type="text" placeholder="Nama pengguna pentadbir" value={username} onChange={e=>setUsername(e.target.value)} autoComplete="username"/>
           <input type="password" placeholder="Kata laluan sementara" value={password} onChange={e=>setPassword(e.target.value)}/>
           <select value={role} onChange={e=>setRole(e.target.value as any)}>
-            <option value="admin">Admin</option>
-            <option value="super_admin">Super Admin</option>
+            <option value="admin">Pentadbir</option>
+            <option value="super_admin">Pentadbir Utama</option>
           </select>
-          <button onClick={createAdmin} disabled={loading}>Tambah Admin</button>
+          <button onClick={createAdmin} disabled={loading}>Tambah Pentadbir</button>
         </div>
       </section>}
 
       <section className="admin-list-box">
         <div className="admin-list-head">
-          <div><span className="admin-manage-kicker">AKAUN PENTADBIR</span><h2>Senarai Admin</h2></div>
+          <div><span className="admin-manage-kicker">AKAUN PENTADBIR</span><h2>Senarai Pentadbir</h2></div>
           <strong>{admins.length} akaun</strong>
         </div>
 
         <div className="admin-manage-table-wrap">
           <table className="admin-manage-table">
-            <thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Dicipta</th><th>Tindakan</th></tr></thead>
+            <thead><tr><th>Nama Pengguna</th><th>Peranan</th><th>Status</th><th>Dicipta</th><th>Tindakan</th></tr></thead>
             <tbody>
               {admins.map(a=><tr key={a.id}>
                 <td><strong>{a.username || "—"}</strong>{a.auth_user_id===me?.userId&&<small> Akaun anda</small>}</td>
-                <td><span className={`admin-role-chip ${a.role}`}>{a.role==="super_admin"?"Super Admin":"Admin"}</span></td>
+                <td><span className={`admin-role-chip ${a.role}`}>{a.role==="super_admin"?"Pentadbir Utama":"Pentadbir"}</span></td>
                 <td><span className={`admin-account-status ${a.is_active?"on":"off"}`}>{a.is_active?"Aktif":"Tidak Aktif"}</span></td>
                 <td>{new Date(a.created_at).toLocaleDateString("ms-MY")}</td>
                 <td>
                   {me?.role==="super_admin" ? <div className="admin-manage-actions">
                     <select value={a.role} disabled={a.auth_user_id===me.userId || loading}
                       onChange={e=>updateAdmin(a.id,{role:e.target.value})}>
-                      <option value="admin">Admin</option>
-                      <option value="super_admin">Super Admin</option>
+                      <option value="admin">Pentadbir</option>
+                      <option value="super_admin">Pentadbir Utama</option>
                     </select>
                     <button
                       disabled={a.auth_user_id===me.userId || loading}
                       onClick={()=>updateAdmin(a.id,{is_active:!a.is_active})}>
-                      {a.is_active?"Deactivate":"Activate"}
+                      {a.is_active?"Nyahaktif":"Aktifkan"}
                     </button>
                   </div> : "—"}
                 </td>

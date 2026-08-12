@@ -24,7 +24,7 @@ export default function LoginPage() {
     });
 
     if (error) setError(error.message);
-    else setMessage("Pautan login telah dihantar ke email anda.");
+    else setMessage("Pautan log masuk telah dihantar ke e-mel anda.");
   }
 
   return (
@@ -32,14 +32,14 @@ export default function LoginPage() {
       <Link href="/" className="small">← Kembali ke laman utama</Link>
       <div style={{marginTop:20}}>
         <span className="eyebrow">Portal Ahli</span>
-        <h2 style={{marginTop:10}}>Login</h2>
+        <h2 style={{marginTop:10}}>Log Masuk</h2>
       </div>
       <form className="form-card" onSubmit={submit}>
         <div className="field">
-          <label>Email</label>
+          <label>E-mel</label>
           <input name="email" type="email" required />
         </div>
-        <button className="btn btn-primary" style={{marginTop:18}}>Hantar Pautan Login</button>
+        <button className="btn btn-primary" style={{marginTop:18}}>Hantar Pautan Log Masuk</button>
         {message && <div className="status ok">{message}</div>}
         {error && <div className="status err">{error}</div>}
       </form>

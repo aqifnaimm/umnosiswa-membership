@@ -221,12 +221,12 @@ export default function MemberManagementPage() {
 
   function exportCSV() {
     if (!shown.length) {
-      setMsg("Tiada data untuk dieksport berdasarkan filter semasa.");
+      setMsg("Tiada data untuk dieksport berdasarkan tapisan semasa.");
       return;
     }
 
     const headers = [
-      "Nama Penuh", "ID UMNOSiswa", "No. Ahli UMNO", "Email", "Telefon",
+      "Nama Penuh", "ID UMNOSiswa", "No. Ahli UMNO", "E-mel", "Telefon",
       "No. IC", "IPT", "Bulan Tamat", "Tahun Tamat", "Zon IPT",
       "Bahagian UMNO", "Status Kelulusan", "Status Pelajar", "Bulan Ke Tamat", "Tarikh Daftar"
     ];
@@ -249,7 +249,7 @@ export default function MemberManagementPage() {
       m.ipt_zone,
       m.umno_division,
       m.status,
-      studentStatus(m) === "alumni" ? "Alumni" : "Active Student",
+      studentStatus(m) === "alumni" ? "Alumni" : "Pelajar Aktif",
       studentStatus(m) === "alumni" ? "" : Math.max(0, monthsUntilGraduation(m)),
       new Date(m.created_at).toLocaleDateString("ms-MY")
     ]);
@@ -293,13 +293,13 @@ export default function MemberManagementPage() {
             <p>Cari ahli mengikut IPT, zon, status dan kemaskini maklumat jika perlu.</p>
           </div>
           <div className="member-admin-header-actions">
-            <Link href="/admin/logs">Audit Log</Link>
-            <Link href="/admin">← Dashboard</Link>
+            <Link href="/admin/logs">Log Audit</Link>
+            <Link href="/admin">← Papan Pemuka</Link>
           </div>
         </header>
 
         <section className="member-admin-stats">
-          <div><span>Active Student</span><strong>{activeStudents}</strong></div>
+          <div><span>Pelajar Aktif</span><strong>{activeStudents}</strong></div>
           <div><span>Alumni</span><strong>{alumniCount}</strong></div>
           <div><span>Tamat ≤ 6 Bulan</span><strong>{graduatingSoon}</strong></div>
           <div><span>Tamat Tahun Ini</span><strong>{graduatingThisYear}</strong></div>
@@ -313,8 +313,8 @@ export default function MemberManagementPage() {
               {me && <small>Logged in: {me.email}</small>}
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              <button onClick={exportCSV} disabled={loading || shown.length === 0}>Export CSV</button>
-              <button onClick={load} disabled={loading}>{loading ? "Loading..." : "Refresh"}</button>
+              <button onClick={exportCSV} disabled={loading || shown.length === 0}>Eksport CSV</button>
+              <button onClick={load} disabled={loading}>{loading ? "Memuatkan..." : "Muat Semula"}</button>
             </div>
           </div>
 
@@ -322,7 +322,7 @@ export default function MemberManagementPage() {
             <input
               value={search}
               onChange={e=>setSearch(e.target.value)}
-              placeholder="Cari nama, ID US, No. UMNO, email, Bahagian..."
+              placeholder="Cari nama, ID US, No. Ahli UMNO, e-mel, Bahagian..."
             />
 
             <select value={iptFilter} onChange={e=>setIptFilter(e.target.value)}>
@@ -337,14 +337,14 @@ export default function MemberManagementPage() {
 
             <select value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}>
               <option value="all">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
+              <option value="pending">Dalam Semakan</option>
+              <option value="approved">Diluluskan</option>
+              <option value="rejected">Ditolak</option>
             </select>
 
             <select value={studentStatusFilter} onChange={e=>setStudentStatusFilter(e.target.value)}>
               <option value="all">Semua Status Pelajar</option>
-              <option value="active_student">Active Student</option>
+              <option value="active_student">Pelajar Aktif</option>
               <option value="alumni">Alumni</option>
             </select>
 
@@ -367,8 +367,8 @@ export default function MemberManagementPage() {
             fontSize:12,
             lineHeight:1.6
           }}>
-            <strong>Auto Alumni:</strong> Status dikira automatik berdasarkan bulan dan tahun tamat pengajian.
-            Rekod lama tanpa bulan menggunakan Disember sebagai fallback.
+            <strong>Alumni Automatik:</strong> Status dikira automatik berdasarkan bulan dan tahun tamat pengajian.
+            Rekod lama tanpa bulan menggunakan Disember sebagai tetapan lalai.
           </div>
 
           <div className="member-admin-table-wrap">
@@ -380,7 +380,7 @@ export default function MemberManagementPage() {
                   <th>IPT</th>
                   <th>Zon</th>
                   <th>Bahagian</th>
-                  <th>No. UMNO</th>
+                  <th>No. Ahli UMNO</th>
                   <th>IC</th>
                   <th>Status Kelulusan</th>
                   <th>Status Pelajar</th>
@@ -410,11 +410,11 @@ export default function MemberManagementPage() {
                     <td>{m.umno_member_no}</td>
                     <td>{maskIC(m.ic_number)}</td>
                     <td>
-                      <span className={`member-admin-status ${m.status}`}>{m.status}</span>
+                      <span className={`member-admin-status ${m.status}`}>{m.status==="pending" ? "Dalam Semakan" : m.status==="approved" ? "Diluluskan" : "Ditolak"}</span>
                     </td>
                     <td>
                       <span className={`member-admin-status ${studentStatus(m) === "alumni" ? "rejected" : "approved"}`}>
-                        {studentStatus(m) === "alumni" ? "Alumni" : "Active Student"}
+                        {studentStatus(m) === "alumni" ? "Alumni" : "Pelajar Aktif"}
                       </span>
                     </td>
                     <td>
@@ -441,7 +441,7 @@ export default function MemberManagementPage() {
           <div className="member-edit-modal" onMouseDown={e=>e.stopPropagation()}>
             <div className="member-edit-head">
               <div>
-                <span>EDIT DATA AHLI</span>
+                <span>SUNTING DATA AHLI</span>
                 <h2>{editing.full_name}</h2>
                 <small>{editing.membership_id || "Belum ada ID UMNOSiswa"}</small>
               </div>
@@ -460,7 +460,7 @@ export default function MemberManagementPage() {
               </label>
 
               <label>
-                Email
+                E-mel
                 <input type="email" value={String(form.email || "")} onChange={e=>setForm({...form,email:e.target.value})}/>
               </label>
 
@@ -512,7 +512,7 @@ export default function MemberManagementPage() {
 
             <div className="member-edit-note">
               ID UMNOSiswa dan status kelulusan tidak diubah melalui editor ini.
-              Gunakan dashboard approval untuk status.
+              Gunakan papan pemuka kelulusan untuk status.
             </div>
 
             <div className="member-edit-actions">

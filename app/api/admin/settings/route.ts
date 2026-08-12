@@ -102,7 +102,7 @@ export async function PATCH(req: Request) {
 
     if (!me || me.role !== "super_admin") {
       return NextResponse.json(
-        { error: "Hanya Super Admin boleh mengubah tetapan sistem." },
+        { error: "Hanya Pentadbir Utama boleh mengubah tetapan sistem." },
         { status: 403 }
       );
     }

@@ -62,8 +62,8 @@ export default function AuditLogsPage(){
     const map:Record<string,string>={
       approve_member:"Lulus Ahli",
       reject_member:"Tolak Ahli",
-      create_admin:"Tambah Admin",
-      update_admin:"Kemaskini Admin"
+      create_admin:"Tambah Pentadbir",
+      update_admin:"Kemas Kini Pentadbir"
     };
     return map[a]||a.replaceAll("_"," ");
   }
@@ -73,9 +73,9 @@ export default function AuditLogsPage(){
     if(l.action==="approve_member"||l.action==="reject_member")
       return [m.member_name,m.membership_id].filter(Boolean).join(" · ")||"Permohonan ahli";
     if(l.action==="create_admin")
-      return `${m.created_admin_email||"Admin baru"}${m.role?` · ${m.role}`:""}`;
+      return `${m.created_admin_email||"Pentadbir baharu"}${m.role?` · ${m.role==="super_admin"?"Pentadbir Utama":"Pentadbir"}`:""}`;
     if(l.action==="update_admin")
-      return `${m.target_admin||"Admin"}${m.changes?` · ${JSON.stringify(m.changes)}`:""}`;
+      return `${m.target_admin||"Pentadbir"}${m.changes?` · ${JSON.stringify(m.changes)}`:""}`;
     return Object.keys(m).length?JSON.stringify(m):"—";
   }
 
@@ -84,34 +84,34 @@ export default function AuditLogsPage(){
       <header className="audit-header">
         <div>
           <span>UMNOSISWA MALAYSIA</span>
-          <h1>Audit Log</h1>
+          <h1>Log Audit</h1>
           <p>Rekod aktiviti pentadbir dalam sistem keahlian.</p>
         </div>
         <div className="audit-header-actions">
-          <Link href="/admin/admins">Manage Admins</Link>
-          <Link href="/admin">← Dashboard</Link>
+          <Link href="/admin/admins">Urus Pentadbir</Link>
+          <Link href="/admin">← Papan Pemuka</Link>
         </div>
       </header>
 
       <section className="audit-stats">
         <div><span>Jumlah Aktiviti</span><strong>{logs.length}</strong></div>
-        <div><span>Approve</span><strong>{logs.filter(x=>x.action==="approve_member").length}</strong></div>
-        <div><span>Reject</span><strong>{logs.filter(x=>x.action==="reject_member").length}</strong></div>
-        <div><span>Admin Actions</span><strong>{logs.filter(x=>x.action.includes("admin")).length}</strong></div>
+        <div><span>Luluskan</span><strong>{logs.filter(x=>x.action==="approve_member").length}</strong></div>
+        <div><span>Tolak</span><strong>{logs.filter(x=>x.action==="reject_member").length}</strong></div>
+        <div><span>Tindakan Pentadbir</span><strong>{logs.filter(x=>x.action.includes("admin")).length}</strong></div>
       </section>
 
       <section className="audit-card">
         <div className="audit-card-head">
           <div>
-            <span className="audit-kicker">SECURITY & ACCOUNTABILITY</span>
+            <span className="audit-kicker">KESELAMATAN & AKAUNTABILITI</span>
             <h2>Aktiviti Pentadbir</h2>
-            {me&&<small>Logged in: {me.email}</small>}
+            {me&&<small>Log masuk: {me.email}</small>}
           </div>
-          <button onClick={load} disabled={loading}>{loading?"Loading...":"Refresh"}</button>
+          <button onClick={load} disabled={loading}>{loading?"Memuatkan...":"Muat Semula"}</button>
         </div>
 
         <div className="audit-toolbar">
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Cari admin, nama ahli, ID ahli..."/>
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Cari pentadbir, nama ahli, ID ahli..."/>
           <select value={action} onChange={e=>setAction(e.target.value)}>
             <option value="all">Semua Tindakan</option>
             {actions.map(a=><option key={a} value={a}>{label(a)}</option>)}
@@ -122,14 +122,14 @@ export default function AuditLogsPage(){
 
         <div className="audit-table-wrap">
           <table className="audit-table">
-            <thead><tr><th>Tarikh / Masa</th><th>Admin</th><th>Tindakan</th><th>Butiran</th></tr></thead>
+            <thead><tr><th>Tarikh / Masa</th><th>Pentadbir</th><th>Tindakan</th><th>Butiran</th></tr></thead>
             <tbody>
               {shown.map(l=><tr key={l.id}>
                 <td>
                   <strong>{new Date(l.created_at).toLocaleDateString("ms-MY")}</strong>
                   <small>{new Date(l.created_at).toLocaleTimeString("ms-MY",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</small>
                 </td>
-                <td>{l.admin_email||"Unknown"}</td>
+                <td>{l.admin_email||"Tidak diketahui"}</td>
                 <td><span className={`audit-action ${l.action}`}>{label(l.action)}</span></td>
                 <td className="audit-detail">{detail(l)}</td>
               </tr>)}

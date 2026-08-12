@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (error) {
-      console.error("Admin username lookup error:", error.message);
+      console.error("Ralat carian nama pengguna pentadbir:", error.message);
       return NextResponse.json(
         { error: "Tidak dapat memproses log masuk." },
         { status: 500 }
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ email: data.email });
   } catch (e: any) {
-    console.error("Admin login error:", e?.message || e);
+    console.error("Ralat log masuk pentadbir:", e?.message || e);
     return NextResponse.json(
       { error: "Tidak dapat memproses log masuk." },
       { status: 500 }

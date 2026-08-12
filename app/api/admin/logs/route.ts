@@ -38,7 +38,7 @@ export async function GET(req:Request){
     // Audit log is restricted to Super Admin because it exposes
     // security/accountability information about other admins.
     if(me.role!=="super_admin")
-      return NextResponse.json({error:"Hanya Super Admin boleh melihat Audit Log."},{status:403});
+      return NextResponse.json({error:"Hanya Pentadbir Utama boleh melihat Log Audit."},{status:403});
 
     const {root}=clients();
     const {data,error}=await root.from("admin_audit_log")

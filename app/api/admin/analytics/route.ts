@@ -56,7 +56,7 @@ export async function GET(req: Request) {
 
     if (me.role === "admin" && !me.ipt_scope) {
       return NextResponse.json(
-        { error: "Akaun admin ini belum ditetapkan skop IPT. Hubungi Super Admin." },
+        { error: "Akaun pentadbir ini belum ditetapkan skop IPT. Hubungi Pentadbir Utama." },
         { status: 403 }
       );
     }

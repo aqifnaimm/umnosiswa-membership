@@ -51,7 +51,7 @@ export async function PATCH(
 
     if (!me || me.role !== "super_admin") {
       return NextResponse.json(
-        { error: "Hanya Super Admin boleh mengubah admin." },
+        { error: "Hanya Pentadbir Utama boleh mengubah pentadbir." },
         { status: 403 }
       );
     }
@@ -66,12 +66,12 @@ export async function PATCH(
 
     if (targetError) throw targetError;
     if (!target) {
-      return NextResponse.json({ error: "Admin tidak ditemui." }, { status: 404 });
+      return NextResponse.json({ error: "Pentadbir tidak ditemui." }, { status: 404 });
     }
 
     if (target.auth_user_id === me.userId) {
       return NextResponse.json(
-        { error: "Anda tidak boleh mengubah role/status/skop akaun sendiri di sini." },
+        { error: "Anda tidak boleh mengubah peranan, status atau skop akaun sendiri di sini." },
         { status: 400 }
       );
     }
@@ -81,7 +81,7 @@ export async function PATCH(
 
     if (body.role !== undefined) {
       if (!["admin", "super_admin"].includes(body.role)) {
-        return NextResponse.json({ error: "Role tidak sah." }, { status: 400 });
+        return NextResponse.json({ error: "Peranan tidak sah." }, { status: 400 });
       }
       patch.role = body.role;
     }
@@ -105,7 +105,7 @@ export async function PATCH(
       patch.ipt_scope = null;
     } else if (!nextScope || !VALID_IPTS.includes(String(nextScope))) {
       return NextResponse.json(
-        { error: "Admin IPT mesti mempunyai satu skop IPT yang sah." },
+        { error: "Pentadbir IPT mesti mempunyai satu skop IPT yang sah." },
         { status: 400 }
       );
     }
@@ -126,7 +126,7 @@ export async function PATCH(
 
       if ((count || 0) <= 1) {
         return NextResponse.json(
-          { error: "Sistem mesti mempunyai sekurang-kurangnya seorang Super Admin aktif." },
+          { error: "Sistem mesti mempunyai sekurang-kurangnya seorang Pentadbir Utama yang aktif." },
           { status: 400 }
         );
       }
@@ -154,7 +154,7 @@ export async function PATCH(
     return NextResponse.json({ ok: true, admin: data });
   } catch (e: any) {
     return NextResponse.json(
-      { error: e.message || "Gagal kemaskini admin." },
+      { error: e.message || "Gagal mengemas kini pentadbir." },
       { status: 500 }
     );
   }

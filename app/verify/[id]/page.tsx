@@ -64,7 +64,7 @@ export default async function VerifyPage({
       .maybeSingle();
 
     if (error) {
-      console.error("Verify membership error:", error.message);
+      console.error("Ralat pengesahan keahlian:", error.message);
     } else {
       data = member;
     }
@@ -108,7 +108,7 @@ export default async function VerifyPage({
             <div className="verify-status-row">
               <span className="verify-valid-chip">✓ DISAHKAN</span>
               <span className={`verify-student-chip ${academicStatus}`}>
-                {academicStatus === "alumni" ? "ALUMNI" : "ACTIVE STUDENT"}
+                {academicStatus === "alumni" ? "ALUMNI" : "PELAJAR AKTIF"}
               </span>
             </div>
 
@@ -122,13 +122,13 @@ export default async function VerifyPage({
               </div>
               <div>
                 <dt>Status Pelajar</dt>
-                <dd>{academicStatus === "alumni" ? "Alumni" : "Active Student"}</dd>
+                <dd>{academicStatus === "alumni" ? "Alumni" : "Pelajar Aktif"}</dd>
               </div>
-              <div><dt>Status Keahlian</dt><dd>Approved</dd></div>
+              <div><dt>Status Keahlian</dt><dd>Diluluskan</dd></div>
             </dl>
 
             <div className="verify-security-note">
-              Halaman ini tidak memaparkan nombor IC, nombor telefon atau alamat email ahli.
+              Halaman ini tidak memaparkan nombor IC, nombor telefon atau alamat e-mel ahli.
             </div>
           </>
         ) : (

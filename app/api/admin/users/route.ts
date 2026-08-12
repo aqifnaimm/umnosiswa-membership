@@ -30,7 +30,7 @@ export async function GET(req:Request){
   try{
     const me=await current(req);
     if(!me||me.role!=="super_admin")
-      return NextResponse.json({error:"Hanya Super Admin boleh melihat pengurusan admin."},{status:403});
+      return NextResponse.json({error:"Hanya Pentadbir Utama boleh melihat pengurusan pentadbir."},{status:403});
 
     const {root}=clients();
     const {data,error}=await root.from("admin_users")
@@ -53,7 +53,7 @@ export async function POST(req:Request){
   try{
     const me=await current(req);
     if(!me||me.role!=="super_admin")
-      return NextResponse.json({error:"Hanya Super Admin boleh tambah admin."},{status:403});
+      return NextResponse.json({error:"Hanya Pentadbir Utama boleh menambah pentadbir."},{status:403});
 
     const body=await req.json();
     const username=String(body.username||"").trim().toLowerCase();
@@ -64,14 +64,14 @@ export async function POST(req:Request){
 
     if(!/^[a-z0-9._-]{3,32}$/.test(username))
       return NextResponse.json({
-        error:"Username mesti 3–32 aksara dan hanya boleh mengandungi huruf kecil, nombor, titik, underscore atau dash."
+        error:"Nama pengguna mesti 3–32 aksara dan hanya boleh mengandungi huruf kecil, nombor, titik, garis bawah atau tanda sempang."
       },{status:400});
 
     if(password.length<8)
       return NextResponse.json({error:"Kata laluan mesti sekurang-kurangnya 8 aksara."},{status:400});
 
     if(role==="admin" && !VALID_IPTS.includes(iptScope || ""))
-      return NextResponse.json({error:"Sila pilih skop IPT yang sah untuk Admin IPT."},{status:400});
+      return NextResponse.json({error:"Sila pilih skop IPT yang sah untuk Pentadbir IPT."},{status:400});
 
     const {root}=clients();
 
@@ -83,7 +83,7 @@ export async function POST(req:Request){
 
     if(existingError)throw existingError;
     if(existing)
-      return NextResponse.json({error:"Username ini telah digunakan."},{status:409});
+      return NextResponse.json({error:"Nama pengguna ini telah digunakan."},{status:409});
 
     const internalEmail=`${username}@admin.umnos.internal`;
 
@@ -95,7 +95,7 @@ export async function POST(req:Request){
 
     if(createError){
       if(String(createError.message||"").toLowerCase().includes("already"))
-        return NextResponse.json({error:"Username ini telah digunakan."},{status:409});
+        return NextResponse.json({error:"Nama pengguna ini telah digunakan."},{status:409});
       throw createError;
     }
 
@@ -133,6 +133,6 @@ export async function POST(req:Request){
         if(!profile) await root.auth.admin.deleteUser(createdAuthUserId);
       }catch{}
     }
-    return NextResponse.json({error:e.message||"Gagal tambah admin."},{status:500})
+    return NextResponse.json({error:e.message||"Gagal menambah pentadbir."},{status:500})
   }
 }

@@ -175,7 +175,7 @@ export default function MemberPortal() {
       );
 
       // Status chip.
-      const statusText = member.student_status === "alumni" ? "ALUMNI" : "ACTIVE STUDENT";
+      const statusText = member.student_status === "alumni" ? "ALUMNI" : "PELAJAR AKTIF";
       roundedRect(ctx, 1200, 82, 320, 78, 39);
       ctx.fillStyle = "rgba(38,201,117,.13)";
       ctx.fill();
@@ -208,7 +208,7 @@ export default function MemberPortal() {
       // Information blocks.
       const info = [
         ["IPT", member.ipt_name],
-        ["STATUS", member.student_status === "alumni" ? "Alumni" : "Active Student"],
+        ["STATUS", member.student_status === "alumni" ? "Alumni" : "Pelajar Aktif"],
         ["TAMAT PENGAJIAN", graduationLabel(member.graduation_month, member.graduation_year)],
         ["ZON IPT", member.ipt_zone],
         ["BAHAGIAN UMNO", member.umno_division]
@@ -254,7 +254,7 @@ export default function MemberPortal() {
       ctx.fillStyle = "#ffffff";
       ctx.textAlign = "center";
       ctx.font = "900 22px Arial, Helvetica, sans-serif";
-      ctx.fillText("SCAN TO VERIFY", 1355, 602);
+      ctx.fillText("IMBAS UNTUK PENGESAHAN", 1355, 602);
       ctx.fillStyle = "rgba(255,255,255,.52)";
       ctx.font = "700 18px Arial, Helvetica, sans-serif";
       ctx.fillText(member.membership_id, 1355, 636);
@@ -274,7 +274,7 @@ export default function MemberPortal() {
       ctx.textAlign = "right";
       ctx.fillStyle = "#ef4650";
       ctx.font = "900 20px Arial, Helvetica, sans-serif";
-      ctx.fillText(`VERIFY: /verify/${member.membership_id}`, 1520, 920);
+      ctx.fillText(`PENGESAHAN: /verify/${member.membership_id}`, 1520, 920);
 
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/png", 1)
@@ -310,7 +310,7 @@ export default function MemberPortal() {
             <Image src="/umnos-logo.jpeg" alt="UMNOSiswa" width={280} height={150} priority />
           </div>
           <span>PORTAL AHLI</span>
-          <h1>Login Ahli UMNOSiswa</h1>
+          <h1>Log Masuk Ahli UMNOSiswa</h1>
           <p>Masukkan ID UMNOSiswa dan 4 digit terakhir nombor IC anda.</p>
         </div>
 
@@ -337,7 +337,7 @@ export default function MemberPortal() {
                       <Image src="/umnos-logo.jpeg" alt="UMNOSiswa" width={230} height={120}/>
                     </div>
                     <span className="active-chip">
-                      {member.student_status === "alumni" ? "ALUMNI" : "ACTIVE STUDENT"}
+                      {member.student_status === "alumni" ? "ALUMNI" : "PELAJAR AKTIF"}
                     </span>
                   </div>
 
@@ -350,7 +350,7 @@ export default function MemberPortal() {
                         <div><span>IPT</span><strong>{member.ipt_name}</strong></div>
                         <div>
                           <span>STATUS</span>
-                          <strong>{member.student_status === "alumni" ? "Alumni" : "Active Student"}</strong>
+                          <strong>{member.student_status === "alumni" ? "Alumni" : "Pelajar Aktif"}</strong>
                         </div>
                         <div>
                           <span>TAMAT PENGAJIAN</span>
@@ -365,17 +365,17 @@ export default function MemberPortal() {
                       <div className="member-qr-box">
                         {qrUrl && <img src={qrUrl} alt={`QR verification ${member.membership_id}`} />}
                       </div>
-                      <strong>SCAN TO VERIFY</strong>
+                      <strong>IMBAS UNTUK PENGESAHAN</strong>
                       <small>{member.membership_id}</small>
                     </div>
                   </div>
 
                   <div className="digital-card-footer">
                     <span>BERSATU • BERSETIA • BERKHIDMAT</span>
-                    <a href={`/verify/${member.membership_id}`}>VERIFY →</a>
+                    <a href={`/verify/${member.membership_id}`}>PENGESAHAN →</a>
                   </div>
                 </div>
-                <p className="member-note">Scan QR untuk pengesahan status keahlian rasmi.</p>
+                <p className="member-note">Imbas kod QR untuk pengesahan status keahlian rasmi.</p>
                 <div className="member-card-actions">
                   <button
                     type="button"
@@ -383,7 +383,7 @@ export default function MemberPortal() {
                     onClick={downloadCard}
                     disabled={downloading}
                   >
-                    {downloading ? "Menjana Kad..." : "↓ Download Kad Ahli PNG"}
+                    {downloading ? "Menjana kad..." : "↓ Muat Turun Kad Ahli PNG"}
                   </button>
                   <a className="member-verify-direct" href={`/verify/${member.membership_id}`}>
                     Buka Halaman Pengesahan →
@@ -393,7 +393,7 @@ export default function MemberPortal() {
               </>
             ):(
               <div className="member-status-card">
-                <span className={`member-status-pill ${member.status}`}>{member.status}</span>
+                <span className={`member-status-pill ${member.status}`}>{member.status==="pending" ? "Dalam Semakan" : member.status==="approved" ? "Diluluskan" : "Ditolak"}</span>
                 <h2>{member.full_name}</h2>
                 <p>{member.status==="pending"?"Permohonan anda masih dalam semakan pentadbir.":"Permohonan anda tidak diluluskan. Sila hubungi pentadbir."}</p>
               </div>

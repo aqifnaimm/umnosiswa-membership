@@ -54,7 +54,7 @@ export default function AnalyticsPage() {
         const d = await r.json();
         if (!r.ok) {
           if (r.status === 401 || r.status === 403) window.location.href = "/admin";
-          setError(d.error || "Gagal mendapatkan analytics.");
+          setError(d.error || "Gagal mendapatkan data analitik.");
           return;
         }
         setPayload(d);
@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
     return items;
   }, [members]);
 
-  if (loading) return <main className="analytics-shell"><div className="analytics-loading">Memuatkan analytics...</div></main>;
+  if (loading) return <main className="analytics-shell"><div className="analytics-loading">Memuatkan analitik...</div></main>;
 
   const maxMonth = Math.max(...monthly, 1);
   const maxZone = Math.max(...zones.map(x=>x[1]), 1);
@@ -147,7 +147,7 @@ export default function AnalyticsPage() {
         <header className="analytics-header">
           <div>
             <span>UMNOSISWA MALAYSIA</span>
-            <h1>Dashboard Analytics</h1>
+            <h1>Papan Pemuka Analitik</h1>
             <p>
               Ringkasan data keahlian, IPT, zon dan unjuran graduasi.
               {payload?.admin.role === "admin" && payload.admin.ipt_scope
@@ -160,7 +160,7 @@ export default function AnalyticsPage() {
               <option value="all">Semua Tahun</option>
               {years.map(y=><option key={y} value={y}>{y}</option>)}
             </select>
-            <Link href="/admin">← Dashboard</Link>
+            <Link href="/admin">← Papan Pemuka</Link>
           </div>
         </header>
 
@@ -168,16 +168,16 @@ export default function AnalyticsPage() {
 
         <section className="analytics-stats">
           <div><span>Jumlah Rekod</span><strong>{stats.total}</strong></div>
-          <div><span>Active Student</span><strong>{stats.active}</strong></div>
+          <div><span>Pelajar Aktif</span><strong>{stats.active}</strong></div>
           <div><span>Alumni</span><strong>{stats.alumni}</strong></div>
-          <div><span>Pending</span><strong>{stats.pending}</strong></div>
-          <div><span>Approved</span><strong>{stats.approved}</strong></div>
-          <div><span>Rejected</span><strong>{stats.rejected}</strong></div>
+          <div><span>Dalam Semakan</span><strong>{stats.pending}</strong></div>
+          <div><span>Diluluskan</span><strong>{stats.approved}</strong></div>
+          <div><span>Ditolak</span><strong>{stats.rejected}</strong></div>
         </section>
 
         <section className="analytics-grid">
           <article className="analytics-card analytics-wide">
-            <div className="analytics-card-head"><div><span>TREND</span><h2>Pendaftaran Mengikut Bulan</h2></div></div>
+            <div className="analytics-card-head"><div><span>CORAK</span><h2>Pendaftaran Mengikut Bulan</h2></div></div>
             <div className="analytics-month-chart">
               {monthly.map((v,i)=>(
                 <div className="analytics-month-col" key={MONTHS[i]}>
@@ -190,9 +190,9 @@ export default function AnalyticsPage() {
           </article>
 
           <article className="analytics-card">
-            <div className="analytics-card-head"><div><span>STATUS</span><h2>Active vs Alumni</h2></div></div>
+            <div className="analytics-card-head"><div><span>STATUS</span><h2>Pelajar Aktif berbanding Alumni</h2></div></div>
             <div className="analytics-status-big">
-              <div><strong>{stats.active}</strong><span>Active Student</span></div>
+              <div><strong>{stats.active}</strong><span>Pelajar Aktif</span></div>
               <div><strong>{stats.alumni}</strong><span>Alumni</span></div>
             </div>
             <div className="analytics-split">
@@ -211,7 +211,7 @@ export default function AnalyticsPage() {
           </article>
 
           <article className="analytics-card">
-            <div className="analytics-card-head"><div><span>TOP 10</span><h2>IPT Dengan Ahli Teramai</h2></div></div>
+            <div className="analytics-card-head"><div><span>10 TERATAS</span><h2>IPT Dengan Ahli Teramai</h2></div></div>
             <div className="analytics-list">
               {ipts.map(([name,value],i)=>(
                 <div key={name}><div className="analytics-list-label"><span>{i+1}. {name}</span><strong>{value}</strong></div><Bar value={value} max={maxIpt}/></div>
@@ -221,7 +221,7 @@ export default function AnalyticsPage() {
           </article>
 
           <article className="analytics-card">
-            <div className="analytics-card-head"><div><span>12 BULAN</span><h2>Graduation Forecast</h2></div></div>
+            <div className="analytics-card-head"><div><span>12 BULAN</span><h2>Unjuran Tamat Pengajian</h2></div></div>
             <div className="analytics-list">
               {forecast.map(x=>(
                 <div key={x.label}><div className="analytics-list-label"><span>{x.label}</span><strong>{x.count}</strong></div><Bar value={x.count} max={maxForecast}/></div>

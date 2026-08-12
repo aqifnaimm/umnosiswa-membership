@@ -76,7 +76,7 @@ export default function AdminPage() {
       const result = await res.json();
 
       if (!res.ok || !result.email) {
-        setMsg(result.error || "Username atau kata laluan tidak sah.");
+        setMsg(result.error || "Nama pengguna atau kata laluan tidak sah.");
         return;
       }
 
@@ -86,7 +86,7 @@ export default function AdminPage() {
       });
 
       if (error || !data.session) {
-        setMsg("Username atau kata laluan tidak sah.");
+        setMsg("Nama pengguna atau kata laluan tidak sah.");
         return;
       }
 
@@ -198,7 +198,7 @@ export default function AdminPage() {
     const ids = selected.filter(id => members.some(m => m.id === id && m.status === "pending"));
 
     if (!ids.length) {
-      setMsg("Pilih sekurang-kurangnya satu permohonan pending.");
+      setMsg("Pilih sekurang-kurangnya satu permohonan dalam semakan.");
       return;
     }
 
@@ -282,22 +282,22 @@ export default function AdminPage() {
             <div className="admin-logo-frame">
               <Image src="/umnos-logo.jpeg" alt="UMNOSiswa Malaysia" width={300} height={180} priority />
             </div>
-            <h1 className="admin-title">Admin Dashboard</h1>
-            <p className="admin-subtitle">Login menggunakan akaun pentadbir anda</p>
+            <h1 className="admin-title">Papan Pemuka Pentadbir</h1>
+            <p className="admin-subtitle">Log masuk menggunakan akaun pentadbir anda</p>
             <div className="admin-title-line" />
           </div>
 
           <div className="admin-glass-card">
             <div className="admin-lock-icon">🔒</div>
 
-            <label className="admin-field-label">Username Admin</label>
+            <label className="admin-field-label">Nama Pengguna Pentadbir</label>
             <div className="admin-input-wrap">
               <input
                 className="admin-key-input"
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder="Masukkan username"
+                placeholder="Masukkan nama pengguna"
                 autoComplete="username"
               />
             </div>
@@ -343,9 +343,9 @@ export default function AdminPage() {
       <header className="admin-dash-header">
         <div>
           <span className="admin-dash-kicker">UMNOSISWA MALAYSIA</span>
-          <h1>Dashboard Pentadbir</h1>
+          <h1>Papan Pemuka Pentadbir</h1>
           <p style={{margin:"8px 0 0",opacity:.65,fontSize:13}}>
-            {profile.email} · {profile.role === "super_admin" ? "Super Admin" : "Admin"}
+            {profile.email} · {profile.role === "super_admin" ? "Pentadbir Utama" : "Admin"}
           </p>
         </div>
         <button className="admin-logout-btn" onClick={logout}>Log Keluar</button>
@@ -354,9 +354,9 @@ export default function AdminPage() {
       <section className="admin-dashboard-body">
         <div className="admin-stat-grid">
           <div className="admin-stat-card"><span>Jumlah Permohonan</span><strong>{members.length}</strong></div>
-          <div className="admin-stat-card"><span>Pending</span><strong>{pending}</strong></div>
-          <div className="admin-stat-card"><span>Approved</span><strong>{approved}</strong></div>
-          <div className="admin-stat-card"><span>Rejected</span><strong>{rejected}</strong></div>
+          <div className="admin-stat-card"><span>Dalam Semakan</span><strong>{pending}</strong></div>
+          <div className="admin-stat-card"><span>Diluluskan</span><strong>{approved}</strong></div>
+          <div className="admin-stat-card"><span>Ditolak</span><strong>{rejected}</strong></div>
         </div>
 
         <div className="admin-data-card">
@@ -378,7 +378,7 @@ export default function AdminPage() {
                 className="admin-refresh-btn"
                 style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}
               >
-                Analytics ↗
+                Analitik ↗
               </Link>
               {profile.role === "super_admin" && (
                 <Link
@@ -386,10 +386,10 @@ export default function AdminPage() {
                   className="admin-refresh-btn"
                   style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}
                 >
-                  System Settings ⚙
+                  Tetapan Sistem ⚙
                 </Link>
               )}
-              <button className="admin-refresh-btn" onClick={() => loadMembers()} disabled={loading}>Refresh</button>
+              <button className="admin-refresh-btn" onClick={() => loadMembers()} disabled={loading}>Muat Semula</button>
             </div>
           </div>
 
@@ -397,21 +397,21 @@ export default function AdminPage() {
             <input placeholder="Cari nama, IPT, no. ahli UMNO, bahagian..." value={q} onChange={e => setQ(e.target.value)} />
             <select value={filter} onChange={e => setFilter(e.target.value)}>
               <option value="all">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
+              <option value="pending">Dalam Semakan</option>
+              <option value="approved">Diluluskan</option>
+              <option value="rejected">Ditolak</option>
             </select>
           </div>
 
           <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",margin:"12px 0"}}>
             <button className="admin-refresh-btn" onClick={toggleAllPending} disabled={loading}>
-              Select All Pending
+              Pilih Semua Dalam Semakan
             </button>
             <button className="admin-approve-btn" onClick={() => bulkChange("approved")} disabled={loading || selected.length === 0}>
-              Approve Selected ({selected.length})
+              Luluskan Pilihan ({selected.length})
             </button>
             <button className="admin-reject-btn" onClick={() => bulkChange("rejected")} disabled={loading || selected.length === 0}>
-              Reject Selected ({selected.length})
+              Tolak Pilihan ({selected.length})
             </button>
             {selected.length > 0 && <small>{selected.length} dipilih</small>}
           </div>
@@ -422,7 +422,7 @@ export default function AdminPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Pilih</th><th>Nama</th><th>IC</th><th>No. UMNO</th><th>IPT</th><th>Zon</th>
+                  <th>Pilih</th><th>Nama</th><th>IC</th><th>No. Ahli UMNO</th><th>IPT</th><th>Zon</th>
                   <th>Bahagian</th><th>Status</th><th>ID</th><th>Tindakan</th>
                 </tr>
               </thead>
@@ -445,13 +445,13 @@ export default function AdminPage() {
                     <td>{m.ipt_name}<small>{graduationLabel(m.graduation_month, m.graduation_year)}</small></td>
                     <td>{m.ipt_zone}</td>
                     <td>{m.umno_division}</td>
-                    <td><span className={`admin-status ${m.status}`}>{m.status}</span></td>
+                    <td><span className={`admin-status ${m.status}`}>{m.status==="pending" ? "Dalam Semakan" : m.status==="approved" ? "Diluluskan" : "Ditolak"}</span></td>
                     <td>{m.membership_id || "—"}</td>
                     <td>
                       {m.status === "pending" ? (
                         <div className="admin-action-row">
-                          <button className="admin-approve-btn" onClick={() => change(m.id,"approved")}>Approve</button>
-                          <button className="admin-reject-btn" onClick={() => change(m.id,"rejected")}>Reject</button>
+                          <button className="admin-approve-btn" onClick={() => change(m.id,"approved")}>Luluskan</button>
+                          <button className="admin-reject-btn" onClick={() => change(m.id,"rejected")}>Tolak</button>
                         </div>
                       ) : <span className="admin-done">Selesai</span>}
                     </td>

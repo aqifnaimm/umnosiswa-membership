@@ -271,9 +271,9 @@ export default async function HomePage() {
 
             <div className="homev3-mini-grid">
               <div><span>01</span><strong>Daftar</strong><small>Permohonan keahlian digital</small></div>
-              <div><span>02</span><strong>Semak</strong><small>Admin approve atau reject</small></div>
+              <div><span>02</span><strong>Semak</strong><small>Pentadbir meluluskan atau menolak</small></div>
               <div><span>03</span><strong>Aktif</strong><small>ID ahli + kad digital</small></div>
-              <div><span>04</span><strong>Verify</strong><small>QR pengesahan keahlian</small></div>
+              <div><span>04</span><strong>Pengesahan</strong><small>QR pengesahan keahlian</small></div>
             </div>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default async function HomePage() {
             <div className="homev3-card-preview-points">
               <div><span>✓</span><strong>ID UMNOSiswa</strong><small>Format USXXXXXX</small></div>
               <div><span>✓</span><strong>QR Verification</strong><small>Semakan keahlian pantas</small></div>
-              <div><span>✓</span><strong>Status Keahlian</strong><small>ACTIVE untuk ahli diluluskan</small></div>
+              <div><span>✓</span><strong>Status Keahlian</strong><small>AKTIF untuk ahli yang diluluskan</small></div>
             </div>
 
             <Link href="/portal" className="homev3-primary-btn">
@@ -313,7 +313,7 @@ export default async function HomePage() {
                     height={110}
                   />
                 </div>
-                <span className="homev3-card-active">ACTIVE</span>
+                <span className="homev3-card-active">AKTIF</span>
               </div>
 
               <div className="homev3-card-mockup-body">
@@ -369,8 +369,8 @@ export default async function HomePage() {
           </div>
 
           <div className="homev3-stat-grid homev3-stat-grid-four">
-            <article><span>Active Student</span><strong>{stats.activeStudents}</strong><small>Ahli approved yang masih dalam tempoh pengajian</small></article>
-            <article><span>Alumni</span><strong>{stats.alumni}</strong><small>Ahli approved yang telah tamat pengajian</small></article>
+            <article><span>Pelajar Aktif</span><strong>{stats.activeStudents}</strong><small>Ahli diluluskan yang masih dalam tempoh pengajian</small></article>
+            <article><span>Alumni</span><strong>{stats.alumni}</strong><small>Ahli diluluskan yang telah tamat pengajian</small></article>
             <article><span>IPT Terlibat</span><strong>{stats.institutions}</strong><small>Institusi dengan ahli aktif atau alumni</small></article>
             <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
           </div>

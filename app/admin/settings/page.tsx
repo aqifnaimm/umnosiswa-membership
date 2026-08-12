@@ -129,10 +129,10 @@ export default function SystemSettingsPage() {
         <header className="system-settings-header">
           <div>
             <span>UMNOSISWA MALAYSIA</span>
-            <h1>System Settings</h1>
+            <h1>Tetapan Sistem</h1>
             <p>Kawal identiti organisasi dan status operasi portal dari satu tempat.</p>
           </div>
-          <Link href="/admin">← Dashboard</Link>
+          <Link href="/admin">← Papan Pemuka</Link>
         </header>
 
         {msg && <div className="system-settings-msg">{msg}</div>}
@@ -186,7 +186,7 @@ export default function SystemSettingsPage() {
                 })}
                 disabled={me?.role !== "super_admin"}
               >
-                {settings.registration_open ? "OPEN" : "CLOSED"}
+                {settings.registration_open ? "DIBUKA" : "DITUTUP"}
               </button>
             </div>
 
@@ -230,7 +230,7 @@ export default function SystemSettingsPage() {
               </div>
               <div>
                 <span>Akses Anda</span>
-                <strong>{me?.role === "super_admin" ? "Super Admin" : "Read Only"}</strong>
+                <strong>{me?.role === "super_admin" ? "Pentadbir Utama" : "Read Only"}</strong>
               </div>
             </div>
 
@@ -240,7 +240,7 @@ export default function SystemSettingsPage() {
               </button>
             ) : (
               <div className="system-settings-readonly">
-                Hanya Super Admin boleh mengubah tetapan sistem.
+                Hanya Pentadbir Utama boleh mengubah tetapan sistem.
               </div>
             )}
           </section>
