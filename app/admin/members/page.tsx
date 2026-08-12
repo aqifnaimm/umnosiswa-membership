@@ -176,6 +176,48 @@ export default function MemberManagementPage() {
     }
   }
 
+  async function deleteMember(m: Member) {
+    if (me?.role !== "super_admin") {
+      setMsg("Hanya Pentadbir Utama boleh membuang rekod ahli.");
+      return;
+    }
+
+    const label = m.membership_id ? `${m.full_name} (${m.membership_id})` : m.full_name;
+    if (!confirm(`Anda pasti mahu membuang ahli ${label}?\n\nTindakan ini tidak boleh dibatalkan.`)) return;
+
+    setLoading(true);
+    setMsg("");
+
+    const t = await token();
+
+    try {
+      const r = await fetch("/api/admin/members", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${t}`
+        },
+        body: JSON.stringify({ id: m.id })
+      });
+
+      const d = await r.json();
+
+      if (!r.ok) {
+        setMsg(d.error || "Gagal membuang ahli.");
+        return;
+      }
+
+      setEditing(null);
+      setForm({});
+      setMsg(`Ahli ${m.full_name}${m.membership_id ? ` (${m.membership_id})` : ""} berjaya dibuang.`);
+      await load();
+    } catch {
+      setMsg("Tidak dapat membuang rekod ahli.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function maskIC(ic: string) {
     const d = String(ic || "").replace(/\D/g, "");
     return d.length >= 4 ? `******-**-${d.slice(-4)}` : "****";
@@ -418,9 +460,28 @@ export default function MemberManagementPage() {
                       </span>
                     </td>
                     <td>
-                      <button className="member-admin-edit-btn" onClick={()=>openEdit(m)}>
-                        Edit
-                      </button>
+                      <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                        <button className="member-admin-edit-btn" onClick={()=>openEdit(m)}>
+                          Edit
+                        </button>
+                        {me?.role === "super_admin" && (
+                          <button
+                            onClick={()=>deleteMember(m)}
+                            disabled={loading}
+                            style={{
+                              border:"1px solid #fecaca",
+                              background:"#fff1f2",
+                              color:"#b91c1c",
+                              borderRadius:8,
+                              padding:"8px 10px",
+                              fontWeight:700,
+                              cursor:loading ? "not-allowed" : "pointer"
+                            }}
+                          >
+                            Buang Ahli
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

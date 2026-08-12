@@ -244,3 +244,90 @@ export async function PATCH(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const me = await current(req);
+
+    if (!me) {
+      return NextResponse.json({ error: "Akses pentadbir tidak sah." }, { status: 403 });
+    }
+
+    if (me.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "Hanya Pentadbir Utama boleh membuang rekod ahli." },
+        { status: 403 }
+      );
+    }
+
+    const body = await req.json();
+
+    if (!body.id || typeof body.id !== "string") {
+      return NextResponse.json({ error: "ID rekod diperlukan." }, { status: 400 });
+    }
+
+    const { root } = clients();
+
+    const { data: member, error: memberError } = await root
+      .from("membership_applications")
+      .select("*")
+      .eq("id", body.id)
+      .maybeSingle();
+
+    if (memberError) throw memberError;
+
+    if (!member) {
+      return NextResponse.json({ error: "Rekod ahli tidak ditemui." }, { status: 404 });
+    }
+
+    const { error: deleteError } = await root
+      .from("membership_applications")
+      .delete()
+      .eq("id", body.id);
+
+    if (deleteError) throw deleteError;
+
+    const { error: auditError } = await root.from("admin_audit_log").insert({
+      admin_user_id: me.userId,
+      admin_email: me.email,
+      action: "delete_member",
+      target_application_id: null,
+      metadata: {
+        deleted_application_id: member.id,
+        membership_id: member.membership_id,
+        member_name: member.full_name,
+        email: member.email,
+        phone_number: member.phone_number,
+        ic_number: member.ic_number,
+        umno_member_no: member.umno_member_no,
+        ipt_name: member.ipt_name,
+        campus: member.campus ?? null,
+        graduation_month: member.graduation_month,
+        graduation_year: member.graduation_year,
+        ipt_zone: member.ipt_zone,
+        umno_division: member.umno_division,
+        status: member.status,
+        deleted_by_role: me.role
+      }
+    });
+
+    if (auditError) {
+      console.error("Ralat log audit buang ahli:", auditError.message);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      deleted: {
+        id: member.id,
+        full_name: member.full_name,
+        membership_id: member.membership_id
+      }
+    });
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e.message || "Gagal membuang rekod ahli." },
+      { status: 500 }
+    );
+  }
+}
+
