@@ -2380,3 +2380,37 @@ linear-gradient(180deg,rgba(3,8,15,.2),rgba(3,8,15,.68))}
   .system-settings-summary{grid-template-columns:1fr}
 }
 
+/* ===== Public System Settings / Maintenance ===== */
+.homev3-maintenance-overlay{
+  position:fixed;inset:0;z-index:99999;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;background:rgba(7,12,23,.96);
+  backdrop-filter:blur(12px)
+}
+.homev3-maintenance-card,.public-status-card{
+  width:min(620px,100%);text-align:center;padding:44px 34px;
+  border-radius:22px;background:#fff;box-shadow:0 30px 80px rgba(0,0,0,.25)
+}
+.homev3-maintenance-card>span,.public-status-card>span{
+  color:#d6322f;font-size:10px;font-weight:900;letter-spacing:.16em
+}
+.homev3-maintenance-card h1,.public-status-card h1{
+  margin:10px 0 12px;font-size:34px;line-height:1.05;color:#15171b
+}
+.homev3-maintenance-card p,.public-status-card p{
+  color:#667085;line-height:1.7;margin:0 0 18px
+}
+.homev3-maintenance-card small{color:#98a2b3}
+.public-status-page{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:24px;background:
+  radial-gradient(circle at 90% 10%,rgba(185,28,28,.12),transparent 30%),#f3f4f6
+}
+.homev3-primary-btn[aria-disabled="true"]{
+  opacity:.65;cursor:not-allowed
+}
+@media(max-width:600px){
+  .homev3-maintenance-card,.public-status-card{padding:34px 22px}
+  .homev3-maintenance-card h1,.public-status-card h1{font-size:28px}
+}
+

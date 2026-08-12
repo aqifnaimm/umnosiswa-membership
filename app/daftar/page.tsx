@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 const zones = ["Utara", "Lembah Klang", "Selatan", "Pantai Timur", "Sabah", "Sarawak"];
 const months = [
@@ -13,9 +13,31 @@ export default function RegisterPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+  const [registrationOpen, setRegistrationOpen] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [maintenanceMessage, setMaintenanceMessage] = useState("Sistem sedang diselenggara. Sila cuba sebentar lagi.");
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(r => r.json())
+      .then(d => {
+        setRegistrationOpen(d.registration_open !== false);
+        setMaintenanceMode(d.maintenance_mode === true);
+        if (d.maintenance_message) setMaintenanceMessage(d.maintenance_message);
+      })
+      .catch(() => {})
+      .finally(() => setSettingsLoading(false));
+  }, []);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    if (!registrationOpen || maintenanceMode) {
+      setError(maintenanceMode ? maintenanceMessage : "Pendaftaran keahlian sedang ditutup.");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
     setError("");
@@ -39,6 +61,36 @@ export default function RegisterPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (settingsLoading) {
+    return <div className="public-status-page"><div className="public-status-card">Memuatkan...</div></div>;
+  }
+
+  if (maintenanceMode) {
+    return (
+      <div className="public-status-page">
+        <div className="public-status-card">
+          <span>UMNOSISWA MALAYSIA</span>
+          <h1>Sistem Dalam Penyelenggaraan</h1>
+          <p>{maintenanceMessage}</p>
+          <Link className="btn btn-outline" href="/">Kembali ke Homepage</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!registrationOpen) {
+    return (
+      <div className="public-status-page">
+        <div className="public-status-card">
+          <span>PENDAFTARAN KEAHLIAN</span>
+          <h1>Pendaftaran Ditutup</h1>
+          <p>Pendaftaran ahli baharu ditutup sementara oleh pentadbir sistem.</p>
+          <Link className="btn btn-outline" href="/">Kembali ke Homepage</Link>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -9,6 +9,22 @@ type HomeStats = {
   institutions: number;
 };
 
+type PublicSettings = {
+  org_name: string;
+  motto: string;
+  registration_open: boolean;
+  maintenance_mode: boolean;
+  maintenance_message: string;
+};
+
+const defaultSettings: PublicSettings = {
+  org_name: "UMNOSiswa Malaysia",
+  motto: "BERSATU • BERSETIA • BERKHIDMAT",
+  registration_open: true,
+  maintenance_mode: false,
+  maintenance_message: "Sistem sedang diselenggara. Sila cuba sebentar lagi."
+};
+
 async function getHomeStats(): Promise<HomeStats> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -77,20 +93,54 @@ async function getHomeStats(): Promise<HomeStats> {
   }
 }
 
+async function getPublicSettings(): Promise<PublicSettings> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) return defaultSettings;
+
+  try {
+    const supabase = createClient(url, serviceKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
+
+    const { data, error } = await supabase
+      .from("system_settings")
+      .select("org_name,motto,registration_open,maintenance_mode,maintenance_message")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error || !data) return defaultSettings;
+    return { ...defaultSettings, ...data };
+  } catch {
+    return defaultSettings;
+  }
+}
+
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const stats = await getHomeStats();
+  const [stats, settings] = await Promise.all([getHomeStats(), getPublicSettings()]);
 
   return (
     <main className="homev3-shell">
+      {settings.maintenance_mode && (
+        <div className="homev3-maintenance-overlay">
+          <div className="homev3-maintenance-card">
+            <span>UMNOSISWA MALAYSIA</span>
+            <h1>Sistem Dalam Penyelenggaraan</h1>
+            <p>{settings.maintenance_message}</p>
+            <small>Sila cuba semula sebentar lagi.</small>
+          </div>
+        </div>
+      )}
       <nav className="homev3-nav">
         <div className="homev3-container homev3-nav-inner">
           <Link href="/" className="homev3-brand">
             <div className="homev3-brand-box">
               <Image
                 src="/umnos-logo.jpeg"
-                alt="UMNOSiswa Malaysia"
+                alt={settings.org_name}
                 width={240}
                 height={130}
                 priority
@@ -103,8 +153,8 @@ export default async function HomePage() {
             <a href="#aktiviti">Aktiviti</a>
             <a href="#statistik">Statistik</a>
             <Link href="/portal">Portal Ahli</Link>
-            <Link href="/daftar" className="homev3-nav-cta">
-              Daftar Keahlian
+            <Link href={settings.registration_open ? "/daftar" : "#pendaftaran"} className="homev3-nav-cta">
+              {settings.registration_open ? "Daftar Keahlian" : "Pendaftaran Ditutup"}
             </Link>
           </div>
         </div>
@@ -130,7 +180,7 @@ export default async function HomePage() {
 
           <h1>
             Keahlian
-            <strong>UMNOSiswa Malaysia</strong>
+            <strong>{settings.org_name}</strong>
           </h1>
 
           <p>
@@ -139,8 +189,8 @@ export default async function HomePage() {
           </p>
 
           <div className="homev3-actions">
-            <Link href="/daftar" className="homev3-primary-btn">
-              Daftar Keahlian
+            <Link href={settings.registration_open ? "/daftar" : "#pendaftaran"} className="homev3-primary-btn">
+              {settings.registration_open ? "Daftar Keahlian" : "Pendaftaran Ditutup"}
               <span>→</span>
             </Link>
             <Link href="/portal" className="homev3-secondary-btn">
@@ -149,7 +199,7 @@ export default async function HomePage() {
           </div>
 
           <div className="homev3-motto">
-            <span>BERSATU</span><b>•</b><span>BERSETIA</span><b>•</b><span>BERKHIDMAT</span>
+            <span>{settings.motto}</span>
           </div>
         </div>
       </section>
@@ -312,7 +362,7 @@ export default async function HomePage() {
         </div>
       </section>\n      </ScrollReveal>
 
-      <ScrollReveal className="homev3-reveal-section">\n      <section className="homev3-cta">
+      <ScrollReveal className="homev3-reveal-section">\n      <section id="pendaftaran" className="homev3-cta">
         <div className="homev3-container">
           <div className="homev3-cta-card">
             <div>
@@ -334,8 +384,8 @@ export default async function HomePage() {
             <strong>UMNOSiswa Malaysia</strong>
             <small>Portal Keahlian Digital</small>
           </div>
-          <div>BERSATU • BERSETIA • BERKHIDMAT</div>
-          <div>© 2026 UMNOSiswa Malaysia</div>
+          <div>{settings.motto}</div>
+          <div>© 2026 {settings.org_name}</div>
         </div>
       </footer> 
     </main>

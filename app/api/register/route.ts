@@ -51,6 +51,40 @@ export async function POST(req: Request) {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // Server-side enforcement for System Settings.
+    // This prevents direct POST requests from bypassing the public UI.
+    const { data: systemSettings, error: settingsError } = await supabase
+      .from("system_settings")
+      .select("registration_open,maintenance_mode,maintenance_message")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (settingsError) {
+      console.error("Registration settings check failed:", settingsError.message);
+      return NextResponse.json(
+        { error: "Tidak dapat menyemak status pendaftaran buat masa ini." },
+        { status: 503 }
+      );
+    }
+
+    if (systemSettings?.maintenance_mode) {
+      return NextResponse.json(
+        {
+          error:
+            systemSettings.maintenance_message ||
+            "Sistem sedang diselenggara. Sila cuba sebentar lagi."
+        },
+        { status: 503 }
+      );
+    }
+
+    if (systemSettings && systemSettings.registration_open === false) {
+      return NextResponse.json(
+        { error: "Pendaftaran keahlian sedang ditutup." },
+        { status: 403 }
+      );
+    }
+
     const email = normalizeEmail(String(body.email));
     const icNumber = normalizeIC(String(body.ic_number));
     const umnoMemberNo = normalizeUmnoNo(String(body.umno_member_no));
