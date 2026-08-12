@@ -17,7 +17,7 @@ type Member = {
 
 type Payload = {
   members: Member[];
-  admin: { email: string; role: "super_admin" | "admin" };
+  admin: { email: string; role: "super_admin" | "admin"; ipt_scope: string | null };
 };
 
 const MONTHS = ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"];
@@ -148,7 +148,12 @@ export default function AnalyticsPage() {
           <div>
             <span>UMNOSISWA MALAYSIA</span>
             <h1>Dashboard Analytics</h1>
-            <p>Ringkasan data keahlian, IPT, zon dan unjuran graduasi.</p>
+            <p>
+              Ringkasan data keahlian, IPT, zon dan unjuran graduasi.
+              {payload?.admin.role === "admin" && payload.admin.ipt_scope
+                ? ` Skop: ${payload.admin.ipt_scope}.`
+                : " Skop: Semua IPT."}
+            </p>
           </div>
           <div className="analytics-header-actions">
             <select value={year} onChange={e=>setYear(e.target.value)}>

@@ -21,17 +21,15 @@ function clients() {
 async function requireAdmin(req: Request) {
   const authHeader = req.headers.get("authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
   if (!token) return null;
 
   const { authClient, adminClient } = clients();
   const { data, error } = await authClient.auth.getUser(token);
-
   if (error || !data.user) return null;
 
   const { data: admin, error: adminError } = await adminClient
     .from("admin_users")
-    .select("email,role,is_active")
+    .select("email,username,role,ipt_scope,is_active")
     .eq("auth_user_id", data.user.id)
     .eq("is_active", true)
     .maybeSingle();
@@ -41,8 +39,19 @@ async function requireAdmin(req: Request) {
   return {
     userId: data.user.id,
     email: admin.email,
-    role: admin.role
+    username: admin.username,
+    role: admin.role,
+    ipt_scope: admin.ipt_scope as string | null
   };
+}
+
+function scopeError(admin: any) {
+  return admin.role === "admin" && !admin.ipt_scope
+    ? NextResponse.json(
+        { error: "Akaun admin ini belum ditetapkan skop IPT. Hubungi Super Admin." },
+        { status: 403 }
+      )
+    : null;
 }
 
 export async function GET(req: Request) {
@@ -50,12 +59,21 @@ export async function GET(req: Request) {
     const admin = await requireAdmin(req);
     if (!admin) return NextResponse.json({ error: "Akses pentadbir tidak sah." }, { status: 403 });
 
+    const missingScope = scopeError(admin);
+    if (missingScope) return missingScope;
+
     const { adminClient } = clients();
-    const { data, error } = await adminClient
+
+    let query = adminClient
       .from("membership_applications")
       .select("*")
       .order("created_at", { ascending: false });
 
+    if (admin.role === "admin") {
+      query = query.eq("ipt_name", admin.ipt_scope);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
 
     return NextResponse.json({ members: data || [], admin });
@@ -68,6 +86,9 @@ export async function PATCH(req: Request) {
   try {
     const admin = await requireAdmin(req);
     if (!admin) return NextResponse.json({ error: "Akses pentadbir tidak sah." }, { status: 403 });
+
+    const missingScope = scopeError(admin);
+    if (missingScope) return missingScope;
 
     const body = await req.json();
     const status = body.status;
@@ -91,31 +112,39 @@ export async function PATCH(req: Request) {
 
     const { adminClient } = clients();
 
-    // Only pending applications can be approved/rejected from this workflow.
-    const { data: pendingRows, error: pendingError } = await adminClient
+    let pendingQuery = adminClient
       .from("membership_applications")
-      .select("id,full_name,membership_id,status")
+      .select("id,full_name,membership_id,status,ipt_name")
       .in("id", ids)
       .eq("status", "pending");
 
+    if (admin.role === "admin") {
+      pendingQuery = pendingQuery.eq("ipt_name", admin.ipt_scope);
+    }
+
+    const { data: pendingRows, error: pendingError } = await pendingQuery;
     if (pendingError) throw pendingError;
 
     if (!pendingRows?.length) {
       return NextResponse.json(
-        { error: "Tiada permohonan pending yang sah dipilih." },
+        { error: "Tiada permohonan pending dalam skop IPT anda yang sah dipilih." },
         { status: 400 }
       );
     }
 
     const validIds = pendingRows.map(row => row.id);
 
-    const { data, error } = await adminClient
+    let updateQuery = adminClient
       .from("membership_applications")
       .update({ status })
       .in("id", validIds)
-      .eq("status", "pending")
-      .select("*");
+      .eq("status", "pending");
 
+    if (admin.role === "admin") {
+      updateQuery = updateQuery.eq("ipt_name", admin.ipt_scope);
+    }
+
+    const { data, error } = await updateQuery.select("*");
     if (error) throw error;
 
     const updated = data || [];
@@ -129,6 +158,8 @@ export async function PATCH(req: Request) {
         metadata: {
           membership_id: member.membership_id,
           member_name: member.full_name,
+          ipt_name: member.ipt_name,
+          admin_scope: admin.role === "super_admin" ? "ALL" : admin.ipt_scope,
           bulk: ids.length > 1
         }
       }));
@@ -137,9 +168,7 @@ export async function PATCH(req: Request) {
         .from("admin_audit_log")
         .insert(auditRows);
 
-      if (auditError) {
-        console.error("Bulk audit log error:", auditError.message);
-      }
+      if (auditError) console.error("Bulk audit log error:", auditError.message);
     }
 
     return NextResponse.json({

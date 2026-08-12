@@ -23,23 +23,27 @@ function clients() {
 async function current(req: Request) {
   const h = req.headers.get("authorization") || "";
   const token = h.startsWith("Bearer ") ? h.slice(7) : "";
-
   if (!token) return null;
 
   const { auth, root } = clients();
-
   const { data, error } = await auth.auth.getUser(token);
   if (error || !data.user) return null;
 
   const { data: profile } = await root
     .from("admin_users")
-    .select("email,role,is_active")
+    .select("email,username,role,ipt_scope,is_active")
     .eq("auth_user_id", data.user.id)
     .eq("is_active", true)
     .maybeSingle();
 
   return profile
-    ? { userId: data.user.id, email: profile.email, role: profile.role }
+    ? {
+        userId: data.user.id,
+        email: profile.email,
+        username: profile.username,
+        role: profile.role,
+        ipt_scope: profile.ipt_scope as string | null
+      }
     : null;
 }
 
@@ -60,24 +64,38 @@ export async function GET(req: Request) {
     const me = await current(req);
 
     if (!me) {
+      return NextResponse.json({ error: "Akses pentadbir tidak sah." }, { status: 403 });
+    }
+
+    if (me.role === "admin" && !me.ipt_scope) {
       return NextResponse.json(
-        { error: "Akses pentadbir tidak sah." },
+        { error: "Akaun admin ini belum ditetapkan skop IPT. Hubungi Super Admin." },
         { status: 403 }
       );
     }
 
     const { root } = clients();
 
-    const { data, error } = await root
+    let query = root
       .from("membership_applications")
       .select("*")
       .order("created_at", { ascending: false });
 
+    if (me.role === "admin") {
+      query = query.eq("ipt_name", me.ipt_scope);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
 
     return NextResponse.json({
       members: data || [],
-      me: { email: me.email, role: me.role }
+      me: {
+        email: me.email,
+        username: me.username,
+        role: me.role,
+        ipt_scope: me.ipt_scope
+      }
     });
   } catch (e: any) {
     return NextResponse.json(
@@ -92,8 +110,12 @@ export async function PATCH(req: Request) {
     const me = await current(req);
 
     if (!me) {
+      return NextResponse.json({ error: "Akses pentadbir tidak sah." }, { status: 403 });
+    }
+
+    if (me.role === "admin" && !me.ipt_scope) {
       return NextResponse.json(
-        { error: "Akses pentadbir tidak sah." },
+        { error: "Akaun admin ini belum ditetapkan skop IPT. Hubungi Super Admin." },
         { status: 403 }
       );
     }
@@ -101,10 +123,7 @@ export async function PATCH(req: Request) {
     const body = await req.json();
 
     if (!body.id) {
-      return NextResponse.json(
-        { error: "ID rekod diperlukan." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "ID rekod diperlukan." }, { status: 400 });
     }
 
     const patch = {
@@ -113,7 +132,7 @@ export async function PATCH(req: Request) {
       email: normalizeEmail(body.email),
       ic_number: normalizeIC(body.ic_number),
       umno_member_no: normalizeUmnoNo(body.umno_member_no),
-      ipt_name: String(body.ipt_name || "").trim(),
+      ipt_name: String(body.ipt_name || "").trim().toUpperCase(),
       graduation_month: body.graduation_month ? Number(body.graduation_month) : null,
       graduation_year: Number(body.graduation_year),
       ipt_zone: String(body.ipt_zone || "").trim(),
@@ -126,10 +145,7 @@ export async function PATCH(req: Request) {
         patch.graduation_month < 1 ||
         patch.graduation_month > 12)
     ) {
-      return NextResponse.json(
-        { error: "Bulan tamat pengajian tidak sah." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Bulan tamat pengajian tidak sah." }, { status: 400 });
     }
 
     if (
@@ -143,47 +159,55 @@ export async function PATCH(req: Request) {
       !patch.ipt_zone ||
       !patch.umno_division
     ) {
+      return NextResponse.json({ error: "Semua medan ahli mesti diisi." }, { status: 400 });
+    }
+
+    if (me.role === "admin" && patch.ipt_name !== me.ipt_scope) {
       return NextResponse.json(
-        { error: "Semua medan ahli mesti diisi." },
-        { status: 400 }
+        { error: `Admin ${me.ipt_scope} tidak boleh memindahkan ahli ke IPT lain.` },
+        { status: 403 }
       );
     }
 
     const { root } = clients();
 
-    const { data: before, error: beforeError } = await root
+    let beforeQuery = root
       .from("membership_applications")
       .select("*")
-      .eq("id", body.id)
-      .maybeSingle();
+      .eq("id", body.id);
 
+    if (me.role === "admin") {
+      beforeQuery = beforeQuery.eq("ipt_name", me.ipt_scope);
+    }
+
+    const { data: before, error: beforeError } = await beforeQuery.maybeSingle();
     if (beforeError) throw beforeError;
 
     if (!before) {
       return NextResponse.json(
-        { error: "Rekod ahli tidak ditemui." },
+        { error: "Rekod ahli tidak ditemui dalam skop IPT anda." },
         { status: 404 }
       );
     }
 
-    const { data, error } = await root
+    let updateQuery = root
       .from("membership_applications")
       .update(patch)
-      .eq("id", body.id)
-      .select("*")
-      .single();
+      .eq("id", body.id);
+
+    if (me.role === "admin") {
+      updateQuery = updateQuery.eq("ipt_name", me.ipt_scope);
+    }
+
+    const { data, error } = await updateQuery.select("*").single();
 
     if (error) {
       if (error.code === "23505") {
         return NextResponse.json(
-          {
-            error:
-              "Data bertindih dengan rekod lain. Semak email, No. IC atau No. Ahli UMNO."
-          },
+          { error: "Data bertindih dengan rekod lain. Semak email, No. IC atau No. Ahli UMNO." },
           { status: 409 }
         );
       }
-
       throw error;
     }
 
@@ -195,6 +219,7 @@ export async function PATCH(req: Request) {
       metadata: {
         membership_id: data.membership_id,
         member_name: data.full_name,
+        admin_scope: me.role === "super_admin" ? "ALL" : me.ipt_scope,
         before: {
           full_name: before.full_name,
           phone_number: before.phone_number,
@@ -211,10 +236,7 @@ export async function PATCH(req: Request) {
       }
     });
 
-    return NextResponse.json({
-      ok: true,
-      member: data
-    });
+    return NextResponse.json({ ok: true, member: data });
   } catch (e: any) {
     return NextResponse.json(
       { error: e.message || "Gagal mengemaskini data ahli." },
