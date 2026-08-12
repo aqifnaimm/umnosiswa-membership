@@ -36,6 +36,7 @@ export default function AdminPage() {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState("all");
   const [showPassword, setShowPassword] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
     restoreSession();
@@ -105,6 +106,7 @@ export default function AdminPage() {
       }
 
       setMembers(data.members || []);
+      setSelected([]);
       setProfile(data.admin);
     } catch {
       setMsg("Tidak dapat berhubung dengan server.");
@@ -147,6 +149,65 @@ export default function AdminPage() {
       await loadMembers(token);
     } catch {
       setMsg("Tidak dapat mengemaskini permohonan.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function toggleSelected(id: string) {
+    setSelected(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  }
+
+  function toggleAllPending() {
+    const pendingIds = shown.filter(m => m.status === "pending").map(m => m.id);
+    const allSelected = pendingIds.length > 0 && pendingIds.every(id => selected.includes(id));
+
+    if (allSelected) {
+      setSelected(prev => prev.filter(id => !pendingIds.includes(id)));
+    } else {
+      setSelected(prev => Array.from(new Set([...prev, ...pendingIds])));
+    }
+  }
+
+  async function bulkChange(status: "approved" | "rejected") {
+    const ids = selected.filter(id => members.some(m => m.id === id && m.status === "pending"));
+
+    if (!ids.length) {
+      setMsg("Pilih sekurang-kurangnya satu permohonan pending.");
+      return;
+    }
+
+    const label = status === "approved" ? "luluskan" : "tolak";
+    if (!confirm(`${label.charAt(0).toUpperCase() + label.slice(1)} ${ids.length} permohonan yang dipilih?`)) return;
+
+    setLoading(true);
+    setMsg("");
+    const token = await getAccessToken();
+
+    try {
+      const res = await fetch("/api/admin/applications", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids, status })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMsg(data.error || "Gagal memproses permohonan secara pukal.");
+        return;
+      }
+
+      setMsg(`${data.updated || ids.length} permohonan berjaya ${status === "approved" ? "diluluskan" : "ditolak"}.`);
+      setSelected([]);
+      await loadMembers(token);
+    } catch {
+      setMsg("Tidak dapat memproses permohonan secara pukal.");
     } finally {
       setLoading(false);
     }
@@ -302,19 +363,42 @@ export default function AdminPage() {
             </select>
           </div>
 
+          <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",margin:"12px 0"}}>
+            <button className="admin-refresh-btn" onClick={toggleAllPending} disabled={loading}>
+              Select All Pending
+            </button>
+            <button className="admin-approve-btn" onClick={() => bulkChange("approved")} disabled={loading || selected.length === 0}>
+              Approve Selected ({selected.length})
+            </button>
+            <button className="admin-reject-btn" onClick={() => bulkChange("rejected")} disabled={loading || selected.length === 0}>
+              Reject Selected ({selected.length})
+            </button>
+            {selected.length > 0 && <small>{selected.length} dipilih</small>}
+          </div>
+
           {msg && <div className="admin-success">{msg}</div>}
 
           <div className="admin-table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Nama</th><th>IC</th><th>No. UMNO</th><th>IPT</th><th>Zon</th>
+                  <th>Pilih</th><th>Nama</th><th>IC</th><th>No. UMNO</th><th>IPT</th><th>Zon</th>
                   <th>Bahagian</th><th>Status</th><th>ID</th><th>Tindakan</th>
                 </tr>
               </thead>
               <tbody>
                 {shown.map(m => (
                   <tr key={m.id}>
+                    <td>
+                      {m.status === "pending" ? (
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(m.id)}
+                          onChange={() => toggleSelected(m.id)}
+                          aria-label={`Pilih ${m.full_name}`}
+                        />
+                      ) : "—"}
+                    </td>
                     <td><strong>{m.full_name}</strong><small>{m.email}</small></td>
                     <td>{mask(m.ic_number)}</td>
                     <td>{m.umno_member_no}</td>
@@ -333,7 +417,7 @@ export default function AdminPage() {
                     </td>
                   </tr>
                 ))}
-                {shown.length === 0 && <tr><td colSpan={9} className="admin-empty">Tiada rekod ditemui.</td></tr>}
+                {shown.length === 0 && <tr><td colSpan={10} className="admin-empty">Tiada rekod ditemui.</td></tr>}
               </tbody>
             </table>
           </div>

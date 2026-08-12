@@ -70,34 +70,85 @@ export async function PATCH(req: Request) {
     if (!admin) return NextResponse.json({ error: "Akses pentadbir tidak sah." }, { status: 403 });
 
     const body = await req.json();
+    const status = body.status;
 
-    if (!body.id || !["approved","rejected"].includes(body.status)) {
+    const ids = Array.isArray(body.ids)
+      ? body.ids.filter((id: unknown) => typeof id === "string" && id)
+      : body.id
+        ? [body.id]
+        : [];
+
+    if (!ids.length || !["approved","rejected"].includes(status)) {
       return NextResponse.json({ error: "Permintaan tidak sah." }, { status: 400 });
+    }
+
+    if (ids.length > 100) {
+      return NextResponse.json(
+        { error: "Maksimum 100 permohonan untuk satu tindakan pukal." },
+        { status: 400 }
+      );
     }
 
     const { adminClient } = clients();
 
+    // Only pending applications can be approved/rejected from this workflow.
+    const { data: pendingRows, error: pendingError } = await adminClient
+      .from("membership_applications")
+      .select("id,full_name,membership_id,status")
+      .in("id", ids)
+      .eq("status", "pending");
+
+    if (pendingError) throw pendingError;
+
+    if (!pendingRows?.length) {
+      return NextResponse.json(
+        { error: "Tiada permohonan pending yang sah dipilih." },
+        { status: 400 }
+      );
+    }
+
+    const validIds = pendingRows.map(row => row.id);
+
     const { data, error } = await adminClient
       .from("membership_applications")
-      .update({ status: body.status })
-      .eq("id", body.id)
-      .select("*")
-      .single();
+      .update({ status })
+      .in("id", validIds)
+      .eq("status", "pending")
+      .select("*");
 
     if (error) throw error;
 
-    await adminClient.from("admin_audit_log").insert({
-      admin_user_id: admin.userId,
-      admin_email: admin.email,
-      action: body.status === "approved" ? "approve_member" : "reject_member",
-      target_application_id: body.id,
-      metadata: {
-        membership_id: data.membership_id,
-        member_name: data.full_name
-      }
-    });
+    const updated = data || [];
 
-    return NextResponse.json({ ok: true, member: data });
+    if (updated.length) {
+      const auditRows = updated.map(member => ({
+        admin_user_id: admin.userId,
+        admin_email: admin.email,
+        action: status === "approved" ? "approve_member" : "reject_member",
+        target_application_id: member.id,
+        metadata: {
+          membership_id: member.membership_id,
+          member_name: member.full_name,
+          bulk: ids.length > 1
+        }
+      }));
+
+      const { error: auditError } = await adminClient
+        .from("admin_audit_log")
+        .insert(auditRows);
+
+      if (auditError) {
+        console.error("Bulk audit log error:", auditError.message);
+      }
+    }
+
+    return NextResponse.json({
+      ok: true,
+      updated: updated.length,
+      members: updated,
+      member: ids.length === 1 ? updated[0] || null : undefined,
+      skipped: ids.length - updated.length
+    });
   } catch (e: any) {
     return NextResponse.json({ error: e.message || "Gagal mengemaskini." }, { status: 500 });
   }
