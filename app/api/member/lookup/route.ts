@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await db()
       .from("membership_applications")
-      .select("full_name,membership_id,ipt_name,graduation_month,graduation_year,ipt_zone,umno_division,status,ic_number")
+      .select("full_name,membership_id,ipt_name,graduation_month,graduation_year,ipt_zone,umno_division,position_level,member_position,status,ic_number")
       .eq("membership_id", membershipId)
       .limit(1)
       .maybeSingle();
