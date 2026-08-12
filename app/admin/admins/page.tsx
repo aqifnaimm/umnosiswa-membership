@@ -21,6 +21,7 @@ export default function AdminManagementPage() {
   const [admins,setAdmins]=useState<Admin[]>([]);
   const [me,setMe]=useState<any>(null);
   const [username,setUsername]=useState("");
+  const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [role,setRole]=useState<"admin"|"super_admin">("admin");
   const [iptScope,setIptScope]=useState("UIAM");
@@ -45,8 +46,13 @@ export default function AdminManagementPage() {
   useEffect(()=>{load()},[]);
 
   async function createAdmin(){
-    if(!username.trim() || password.length<8) {
-      setMsg("Masukkan nama pengguna dan kata laluan sekurang-kurangnya 8 aksara.");
+    const cleanEmail=email.trim().toLowerCase();
+    if(!username.trim() || !cleanEmail || password.length<8) {
+      setMsg("Masukkan nama pengguna, e-mel pentadbir dan kata laluan sekurang-kurangnya 8 aksara.");
+      return;
+    }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setMsg("Masukkan alamat e-mel pentadbir yang sah.");
       return;
     }
     setLoading(true); setMsg("");
@@ -56,6 +62,7 @@ export default function AdminManagementPage() {
       headers:{"Content-Type":"application/json",Authorization:`Bearer ${t}`},
       body:JSON.stringify({
         username:username.trim().toLowerCase(),
+        email:cleanEmail,
         password,
         role,
         ipt_scope: role==="admin" ? iptScope : null
@@ -63,7 +70,7 @@ export default function AdminManagementPage() {
     });
     const d=await r.json();
     if(!r.ok){setMsg(d.error||"Gagal menambah pentadbir.");setLoading(false);return;}
-    setUsername("");setPassword("");setRole("admin");setIptScope("UIAM");
+    setUsername("");setEmail("");setPassword("");setRole("admin");setIptScope("UIAM");
     setMsg("Pentadbir baharu berjaya ditambah.");
     await load();
   }
@@ -102,6 +109,7 @@ export default function AdminManagementPage() {
         </div>
         <div className="admin-create-grid">
           <input type="text" placeholder="Nama pengguna pentadbir" value={username} onChange={e=>setUsername(e.target.value)} autoComplete="username"/>
+          <input type="email" placeholder="E-mel pentadbir" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" required/>
           <input type="password" placeholder="Kata laluan sementara" value={password} onChange={e=>setPassword(e.target.value)}/>
           <select value={role} onChange={e=>setRole(e.target.value as any)}>
             <option value="admin">Pentadbir IPT</option>
@@ -126,10 +134,11 @@ export default function AdminManagementPage() {
 
         <div className="admin-manage-table-wrap">
           <table className="admin-manage-table">
-            <thead><tr><th>Nama Pengguna</th><th>Peranan</th><th>Skop IPT</th><th>Status</th><th>Dicipta</th><th>Tindakan</th></tr></thead>
+            <thead><tr><th>Nama Pengguna</th><th>E-mel</th><th>Peranan</th><th>Skop IPT</th><th>Status</th><th>Dicipta</th><th>Tindakan</th></tr></thead>
             <tbody>
               {admins.map(a=><tr key={a.id}>
                 <td><strong>{a.username || "—"}</strong>{a.auth_user_id===me?.userId&&<small> Akaun anda</small>}</td>
+                <td>{a.email || "—"}</td>
                 <td><span className={`admin-role-chip ${a.role}`}>{a.role==="super_admin"?"Pentadbir Utama":"Pentadbir IPT"}</span></td>
                 <td>
                   {a.role==="super_admin" ? (

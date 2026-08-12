@@ -34,7 +34,7 @@ export async function GET(req:Request){
 
     const {root}=clients();
     const {data,error}=await root.from("admin_users")
-      .select("id,auth_user_id,username,role,ipt_scope,is_active,created_at")
+      .select("id,auth_user_id,email,username,role,ipt_scope,is_active,created_at")
       .order("created_at");
     if(error)throw error;
 
@@ -57,6 +57,7 @@ export async function POST(req:Request){
 
     const body=await req.json();
     const username=String(body.username||"").trim().toLowerCase();
+    const email=String(body.email||"").trim().toLowerCase();
     const password=String(body.password||"");
     const role=["admin","super_admin"].includes(body.role)?body.role:"admin";
     const requestedScope=String(body.ipt_scope||"").trim().toUpperCase();
@@ -67,6 +68,9 @@ export async function POST(req:Request){
         error:"Nama pengguna mesti 3–32 aksara dan hanya boleh mengandungi huruf kecil, nombor, titik, garis bawah atau tanda sempang."
       },{status:400});
 
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return NextResponse.json({error:"Sila masukkan alamat e-mel pentadbir yang sah."},{status:400});
+
     if(password.length<8)
       return NextResponse.json({error:"Kata laluan mesti sekurang-kurangnya 8 aksara."},{status:400});
 
@@ -75,16 +79,27 @@ export async function POST(req:Request){
 
     const {root}=clients();
 
-    const {data:existing,error:existingError}=await root
+    const {data:existingUsername,error:existingUsernameError}=await root
       .from("admin_users")
       .select("id")
       .ilike("username",username)
       .maybeSingle();
 
-    if(existingError)throw existingError;
-    if(existing)
+    if(existingUsernameError)throw existingUsernameError;
+    if(existingUsername)
       return NextResponse.json({error:"Nama pengguna ini telah digunakan."},{status:409});
 
+    const {data:existingEmail,error:existingEmailError}=await root
+      .from("admin_users")
+      .select("id")
+      .ilike("email",email)
+      .maybeSingle();
+
+    if(existingEmailError)throw existingEmailError;
+    if(existingEmail)
+      return NextResponse.json({error:"E-mel pentadbir ini telah digunakan."},{status:409});
+
+    // Kekalkan e-mel dalaman Supabase Auth supaya kaedah login berasaskan username sedia ada tidak berubah.
     const internalEmail=`${username}@admin.umnos.internal`;
 
     const {data:created,error:createError}=await root.auth.admin.createUser({
@@ -103,12 +118,12 @@ export async function POST(req:Request){
 
     const {data:profile,error:profileError}=await root.from("admin_users").insert({
       auth_user_id:created.user.id,
-      email:internalEmail,
+      email,
       username,
       role,
       ipt_scope:iptScope,
       is_active:true
-    }).select("id,auth_user_id,username,role,ipt_scope,is_active,created_at").single();
+    }).select("id,auth_user_id,email,username,role,ipt_scope,is_active,created_at").single();
 
     if(profileError){
       await root.auth.admin.deleteUser(created.user.id);
@@ -120,7 +135,7 @@ export async function POST(req:Request){
       admin_user_id:me.userId,
       admin_email:me.email,
       action:"create_admin",
-      metadata:{created_admin_username:username,role,ipt_scope:iptScope}
+      metadata:{created_admin_username:username,created_admin_email:email,role,ipt_scope:iptScope}
     });
 
     return NextResponse.json({ok:true,admin:profile});
