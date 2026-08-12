@@ -1,7 +1,55 @@
 import Image from "next/image";
 import Link from "next/link";
 
-export default function HomePage() {
+type HomeStats = {
+  activeMembers: number;
+  institutions: number;
+};
+
+async function getHomeStats(): Promise<HomeStats> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !anon) {
+    return { activeMembers: 0, institutions: 0 };
+  }
+
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/membership_applications?select=ipt_name&status=eq.approved`,
+      {
+        headers: {
+          apikey: anon,
+          Authorization: `Bearer ${anon}`
+        },
+        next: { revalidate: 60 }
+      }
+    );
+
+    if (!res.ok) {
+      return { activeMembers: 0, institutions: 0 };
+    }
+
+    const rows: Array<{ ipt_name: string | null }> = await res.json();
+
+    const institutions = new Set(
+      rows
+        .map(row => String(row.ipt_name || "").trim().toLowerCase())
+        .filter(Boolean)
+    ).size;
+
+    return {
+      activeMembers: rows.length,
+      institutions
+    };
+  } catch {
+    return { activeMembers: 0, institutions: 0 };
+  }
+}
+
+export default async function HomePage() {
+  const stats = await getHomeStats();
+
   return (
     <main className="homev3-shell">
       <nav className="homev3-nav">
@@ -219,13 +267,13 @@ export default function HomePage() {
             <span className="homev3-kicker">STATISTIK KEAHLIAN</span>
             <h2>Satu sistem untuk seluruh rangkaian IPT.</h2>
             <p>
-              Statistik live boleh disambungkan terus kepada Supabase pada langkah seterusnya.
+              Statistik keahlian dikemaskini secara automatik berdasarkan ahli yang telah diluluskan.
             </p>
           </div>
 
           <div className="homev3-stat-grid">
-            <article><span>Ahli Aktif</span><strong>—</strong><small>Jumlah approved members</small></article>
-            <article><span>IPT Terlibat</span><strong>—</strong><small>Institusi dengan ahli berdaftar</small></article>
+            <article><span>Ahli Aktif</span><strong>{stats.activeMembers}</strong><small>Jumlah ahli yang telah diluluskan</small></article>
+            <article><span>IPT Terlibat</span><strong>{stats.institutions}</strong><small>Institusi dengan ahli aktif</small></article>
             <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
           </div>
         </div>
