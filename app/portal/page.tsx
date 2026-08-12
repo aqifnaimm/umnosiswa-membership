@@ -8,10 +8,23 @@ type Member = {
   full_name: string;
   membership_id: string | null;
   ipt_name: string;
+  graduation_month: number | null;
+  graduation_year: number;
+  student_status: "active_student" | "alumni";
   ipt_zone: string;
   umno_division: string;
   status: "pending" | "approved" | "rejected";
 };
+
+const MONTHS = [
+  "Januari","Februari","Mac","April","Mei","Jun",
+  "Julai","Ogos","September","Oktober","November","Disember"
+];
+
+function graduationLabel(month: number | null, year: number) {
+  if (!month || month < 1 || month > 12) return String(year);
+  return `${MONTHS[month - 1]} ${year}`;
+}
 
 export default function MemberPortal() {
   const [memberId, setMemberId] = useState("");
@@ -81,7 +94,9 @@ export default function MemberPortal() {
                     <div className="digital-logo">
                       <Image src="/umnos-logo.jpeg" alt="UMNOSiswa" width={230} height={120}/>
                     </div>
-                    <span className="active-chip">ACTIVE</span>
+                    <span className="active-chip">
+                      {member.student_status === "alumni" ? "ALUMNI" : "ACTIVE STUDENT"}
+                    </span>
                   </div>
 
                   <div className="digital-card-main-grid">
@@ -91,6 +106,14 @@ export default function MemberPortal() {
                       <div className="member-number">{member.membership_id}</div>
                       <div className="digital-details">
                         <div><span>IPT</span><strong>{member.ipt_name}</strong></div>
+                        <div>
+                          <span>STATUS</span>
+                          <strong>{member.student_status === "alumni" ? "Alumni" : "Active Student"}</strong>
+                        </div>
+                        <div>
+                          <span>TAMAT PENGAJIAN</span>
+                          <strong>{graduationLabel(member.graduation_month, member.graduation_year)}</strong>
+                        </div>
                         <div><span>ZON IPT</span><strong>{member.ipt_zone}</strong></div>
                         <div><span>BAHAGIAN UMNO</span><strong>{member.umno_division}</strong></div>
                       </div>

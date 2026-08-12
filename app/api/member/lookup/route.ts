@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await db()
       .from("membership_applications")
-      .select("full_name,membership_id,ipt_name,ipt_zone,umno_division,status,ic_number")
+      .select("full_name,membership_id,ipt_name,graduation_month,graduation_year,ipt_zone,umno_division,status,ic_number")
       .eq("membership_id", membershipId)
       .limit(1)
       .maybeSingle();
@@ -55,9 +55,29 @@ export async function POST(req: Request) {
       );
     }
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    const graduationYear = Number(data.graduation_year);
+    const graduationMonth = data.graduation_month
+      ? Number(data.graduation_month)
+      : 12;
+
+    const studentStatus =
+      graduationYear < currentYear ||
+      (graduationYear === currentYear && graduationMonth < currentMonth)
+        ? "alumni"
+        : "active_student";
+
     const { ic_number, ...safeMember } = data;
 
-    return NextResponse.json({ member: safeMember });
+    return NextResponse.json({
+      member: {
+        ...safeMember,
+        student_status: studentStatus
+      }
+    });
   } catch (e: any) {
     return NextResponse.json(
       { error: e.message || "Gagal membuat semakan." },
