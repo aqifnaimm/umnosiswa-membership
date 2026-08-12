@@ -324,7 +324,7 @@ export default async function HomePage() {
               <div className="homev3-card-mockup-body">
                 <small>KAD KEAHLIAN DIGITAL</small>
                 <h3>MUHAMMAD AQIF NAIM</h3>
-                <div className="homev3-card-id">US000001</div>
+                <div className="homev3-card-id">US000002</div>
 
                 <div className="homev3-card-details">
                   <div><span>IPT</span><strong>IIUM / UIAM</strong></div>
