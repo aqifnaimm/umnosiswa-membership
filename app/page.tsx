@@ -3,7 +3,8 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
 type HomeStats = {
-  activeMembers: number;
+  activeStudents: number;
+  alumni: number;
   institutions: number;
 };
 
@@ -12,7 +13,7 @@ async function getHomeStats(): Promise<HomeStats> {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceKey) {
-    return { activeMembers: 0, institutions: 0 };
+    return { activeStudents: 0, alumni: 0, institutions: 0 };
   }
 
   try {
@@ -25,15 +26,38 @@ async function getHomeStats(): Promise<HomeStats> {
 
     const { data, error } = await supabase
       .from("membership_applications")
-      .select("ipt_name")
+      .select("ipt_name,graduation_month,graduation_year,status")
       .eq("status", "approved");
 
     if (error) {
       console.error("Homepage stats error:", error.message);
-      return { activeMembers: 0, institutions: 0 };
+      return { activeStudents: 0, alumni: 0, institutions: 0 };
     }
 
     const rows = data || [];
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    let activeStudents = 0;
+    let alumni = 0;
+
+    for (const row of rows) {
+      const graduationYear = Number(row.graduation_year);
+      const graduationMonth =
+        row.graduation_month &&
+        Number(row.graduation_month) >= 1 &&
+        Number(row.graduation_month) <= 12
+          ? Number(row.graduation_month)
+          : 12;
+
+      const isAlumni =
+        graduationYear < currentYear ||
+        (graduationYear === currentYear && graduationMonth < currentMonth);
+
+      if (isAlumni) alumni += 1;
+      else activeStudents += 1;
+    }
 
     const institutions = new Set(
       rows
@@ -42,12 +66,13 @@ async function getHomeStats(): Promise<HomeStats> {
     ).size;
 
     return {
-      activeMembers: rows.length,
+      activeStudents,
+      alumni,
       institutions
     };
   } catch (error) {
     console.error("Homepage stats exception:", error);
-    return { activeMembers: 0, institutions: 0 };
+    return { activeStudents: 0, alumni: 0, institutions: 0 };
   }
 }
 
@@ -273,13 +298,14 @@ export default async function HomePage() {
             <span className="homev3-kicker">STATISTIK KEAHLIAN</span>
             <h2>Satu sistem untuk seluruh rangkaian IPT.</h2>
             <p>
-              Statistik keahlian dikemaskini secara automatik berdasarkan ahli yang telah diluluskan.
+              Statistik keahlian dikemaskini secara automatik berdasarkan rekod ahli yang telah diluluskan.
             </p>
           </div>
 
-          <div className="homev3-stat-grid">
-            <article><span>Ahli Aktif</span><strong>{stats.activeMembers}</strong><small>Jumlah ahli yang telah diluluskan</small></article>
-            <article><span>IPT Terlibat</span><strong>{stats.institutions}</strong><small>Institusi dengan ahli aktif</small></article>
+          <div className="homev3-stat-grid homev3-stat-grid-four">
+            <article><span>Active Student</span><strong>{stats.activeStudents}</strong><small>Ahli approved yang masih dalam tempoh pengajian</small></article>
+            <article><span>Alumni</span><strong>{stats.alumni}</strong><small>Ahli approved yang telah tamat pengajian</small></article>
+            <article><span>IPT Terlibat</span><strong>{stats.institutions}</strong><small>Institusi dengan ahli aktif atau alumni</small></article>
             <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
           </div>
         </div>
