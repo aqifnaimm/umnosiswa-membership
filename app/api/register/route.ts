@@ -24,6 +24,7 @@ export async function POST(req: Request) {
       "ic_number",
       "umno_member_no",
       "ipt_name",
+      "graduation_month",
       "graduation_year",
       "ipt_zone",
       "umno_division"
@@ -57,6 +58,15 @@ export async function POST(req: Request) {
     if (icNumber.length < 8) {
       return NextResponse.json(
         { error: "Nombor IC tidak sah." },
+        { status: 400 }
+      );
+    }
+
+    const graduationMonth = Number(body.graduation_month);
+
+    if (!Number.isInteger(graduationMonth) || graduationMonth < 1 || graduationMonth > 12) {
+      return NextResponse.json(
+        { error: "Bulan tamat pengajian tidak sah." },
         { status: 400 }
       );
     }
@@ -131,6 +141,7 @@ export async function POST(req: Request) {
         ic_number: icNumber,
         umno_member_no: umnoMemberNo,
         ipt_name: String(body.ipt_name).trim(),
+        graduation_month: Number(body.graduation_month),
         graduation_year: Number(body.graduation_year),
         ipt_zone: String(body.ipt_zone).trim(),
         umno_division: String(body.umno_division).trim(),
