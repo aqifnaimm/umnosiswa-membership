@@ -34,6 +34,7 @@ export default function MemberManagementPage() {
   const [iptFilter, setIptFilter] = useState("all");
   const [zoneFilter, setZoneFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [studentStatusFilter, setStudentStatusFilter] = useState("all");
   const [editing, setEditing] = useState<Member | null>(null);
   const [form, setForm] = useState<Partial<Member>>({});
   const [msg, setMsg] = useState("");
@@ -107,10 +108,11 @@ export default function MemberManagementPage() {
         (!q || haystack.includes(q)) &&
         (iptFilter === "all" || m.ipt_name === iptFilter) &&
         (zoneFilter === "all" || m.ipt_zone === zoneFilter) &&
-        (statusFilter === "all" || m.status === statusFilter)
+        (statusFilter === "all" || m.status === statusFilter) &&
+        (studentStatusFilter === "all" || studentStatus(m) === studentStatusFilter)
       );
     });
-  }, [members, search, iptFilter, zoneFilter, statusFilter]);
+  }, [members, search, iptFilter, zoneFilter, statusFilter, studentStatusFilter]);
 
   function openEdit(m: Member) {
     setEditing(m);
@@ -178,6 +180,23 @@ export default function MemberManagementPage() {
     return `Tamat ${MONTHS[month - 1]} ${year}`;
   }
 
+  function studentStatus(m: Member) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const graduationMonth =
+      m.graduation_month && m.graduation_month >= 1 && m.graduation_month <= 12
+        ? m.graduation_month
+        : 12;
+
+    return (
+      m.graduation_year < currentYear ||
+      (m.graduation_year === currentYear && graduationMonth < currentMonth)
+    )
+      ? "alumni"
+      : "active_student";
+  }
+
   function exportCSV() {
     if (!shown.length) {
       setMsg("Tiada data untuk dieksport berdasarkan filter semasa.");
@@ -187,7 +206,7 @@ export default function MemberManagementPage() {
     const headers = [
       "Nama Penuh", "ID UMNOSiswa", "No. Ahli UMNO", "Email", "Telefon",
       "No. IC", "IPT", "Bulan Tamat", "Tahun Tamat", "Zon IPT",
-      "Bahagian UMNO", "Status", "Tarikh Daftar"
+      "Bahagian UMNO", "Status Kelulusan", "Status Pelajar", "Tarikh Daftar"
     ];
 
     const csvEscape = (value: unknown) => {
@@ -208,6 +227,7 @@ export default function MemberManagementPage() {
       m.ipt_zone,
       m.umno_division,
       m.status,
+      studentStatus(m) === "alumni" ? "Alumni" : "Active Student",
       new Date(m.created_at).toLocaleDateString("ms-MY")
     ]);
 
@@ -221,7 +241,8 @@ export default function MemberManagementPage() {
     const filterName = [
       iptFilter !== "all" ? iptFilter : "Semua-IPT",
       zoneFilter !== "all" ? zoneFilter : "Semua-Zon",
-      statusFilter !== "all" ? statusFilter : "Semua-Status"
+      statusFilter !== "all" ? statusFilter : "Semua-Status",
+      studentStatusFilter !== "all" ? studentStatusFilter : "Semua-Status-Pelajar"
     ].join("_").replace(/[^a-zA-Z0-9_-]+/g, "-");
 
     a.href = url;
@@ -291,6 +312,12 @@ export default function MemberManagementPage() {
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
             </select>
+
+            <select value={studentStatusFilter} onChange={e=>setStudentStatusFilter(e.target.value)}>
+              <option value="all">Semua Status Pelajar</option>
+              <option value="active_student">Active Student</option>
+              <option value="alumni">Alumni</option>
+            </select>
           </div>
 
           {msg && <div className="member-admin-msg">{msg}</div>}
@@ -306,7 +333,8 @@ export default function MemberManagementPage() {
                   <th>Bahagian</th>
                   <th>No. UMNO</th>
                   <th>IC</th>
-                  <th>Status</th>
+                  <th>Status Kelulusan</th>
+                  <th>Status Pelajar</th>
                   <th>Tindakan</th>
                 </tr>
               </thead>
@@ -331,6 +359,11 @@ export default function MemberManagementPage() {
                       <span className={`member-admin-status ${m.status}`}>{m.status}</span>
                     </td>
                     <td>
+                      <span className={`member-admin-status ${studentStatus(m) === "alumni" ? "rejected" : "approved"}`}>
+                        {studentStatus(m) === "alumni" ? "Alumni" : "Active Student"}
+                      </span>
+                    </td>
+                    <td>
                       <button className="member-admin-edit-btn" onClick={()=>openEdit(m)}>
                         Edit
                       </button>
@@ -340,7 +373,7 @@ export default function MemberManagementPage() {
 
                 {!loading && shown.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="member-admin-empty">Tiada rekod ditemui.</td>
+                    <td colSpan={10} className="member-admin-empty">Tiada rekod ditemui.</td>
                   </tr>
                 )}
               </tbody>
