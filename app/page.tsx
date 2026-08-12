@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import ScrollReveal from "./ScrollReveal";
+import MembershipCheck from "./MembershipCheck";
 
 type HomeStats = {
   activeStudents: number;
@@ -152,6 +153,7 @@ export default async function HomePage() {
             <a href="#tentang">Tentang</a>
             <a href="#aktiviti">Aktiviti</a>
             <a href="#statistik">Statistik</a>
+            <a href="#semakan">Semakan Keahlian</a>
             <Link href="/portal">Portal Ahli</Link>
             <Link href={settings.registration_open ? "/daftar" : "#pendaftaran"} className="homev3-nav-cta">
               {settings.registration_open ? "Daftar Keahlian" : "Pendaftaran Ditutup"}
@@ -342,6 +344,19 @@ export default async function HomePage() {
           </div>
         </div>
       </section>\n      </ScrollReveal>
+
+      <ScrollReveal className="homev3-reveal-section">
+        <section id="semakan" className="homev3-membership-check-section">
+          <div className="homev3-container">
+            <div className="homev3-section-head">
+              <span className="homev3-kicker">SEMAKAN KEAHLIAN</span>
+              <h2>Semak status keahlian anda.</h2>
+              <p>Masukkan nombor kad pengenalan untuk menyemak rekod keahlian UMNOSiswa.</p>
+            </div>
+            <MembershipCheck registrationOpen={settings.registration_open} />
+          </div>
+        </section>
+      </ScrollReveal>
 
       <ScrollReveal className="homev3-reveal-section">\n      <section id="statistik" className="homev3-stats">
         <div className="homev3-container">
