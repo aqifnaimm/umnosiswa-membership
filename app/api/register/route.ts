@@ -28,16 +28,31 @@ export async function POST(req: Request) {
       "graduation_month",
       "graduation_year",
       "ipt_zone",
-      "umno_division"
+      "umno_division",
+      "privacy_consent"
     ];
 
     for (const key of required) {
-      if (!body[key]) {
+      const value = body[key];
+      const missing =
+        value === undefined ||
+        value === null ||
+        value === false ||
+        (typeof value === "string" && value.trim() === "");
+
+      if (missing) {
         return NextResponse.json(
           { error: `Medan ${key} diperlukan.` },
           { status: 400 }
         );
       }
+    }
+
+    if (!body.privacy_consent) {
+      return NextResponse.json(
+        { error: "Persetujuan Notis Privasi diperlukan." },
+        { status: 400 }
+      );
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
