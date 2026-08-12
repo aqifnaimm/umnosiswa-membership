@@ -18,10 +18,31 @@ type Member = {
   umno_division: string;
   status: "pending" | "approved" | "rejected";
   membership_id: string | null;
+  position_level: "nasional" | "ipt";
+  member_position: string;
   created_at: string;
 };
 
 const ZONES = ["Utara","Lembah Klang","Selatan","Pantai Timur","Sabah","Sarawak"];
+
+const NATIONAL_POSITIONS = [
+  "Presiden",
+  "Timbalan Presiden",
+  "Setiausaha Agung",
+  "Bendahari Kehormat",
+  "Ketua Penerangan",
+  "Ketua Siswi"
+];
+
+const IPT_POSITIONS = [
+  "Pengerusi IPT",
+  "Timbalan Pengerusi IPT",
+  "Setiausaha IPT",
+  "Bendahari IPT",
+  "Ketua Penerangan IPT",
+  "AJK IPT",
+  "Ahli IPT"
+];
 const MONTHS = [
   "Januari","Februari","Mac","April","Mei","Jun",
   "Julai","Ogos","September","Oktober","November","Disember"
@@ -102,7 +123,9 @@ export default function MemberManagementPage() {
         m.ipt_name,
         m.ipt_zone,
         m.umno_division,
-        m.membership_id || ""
+        m.membership_id || "",
+        m.position_level || "",
+        m.member_position || ""
       ].join(" ").toLowerCase();
 
       return (
@@ -146,7 +169,9 @@ export default function MemberManagementPage() {
         graduation_month: form.graduation_month ? Number(form.graduation_month) : null,
         graduation_year: Number(form.graduation_year),
         ipt_zone: form.ipt_zone,
-        umno_division: form.umno_division
+        umno_division: form.umno_division,
+        position_level: form.position_level || "ipt",
+        member_position: form.member_position || "Ahli IPT"
       };
 
       const r = await fetch("/api/admin/members", {
@@ -270,7 +295,7 @@ export default function MemberManagementPage() {
     const headers = [
       "Nama Penuh", "ID UMNOSiswa", "No. Ahli UMNO", "E-mel", "Telefon",
       "No. IC", "IPT", "Bulan Tamat", "Tahun Tamat", "Zon IPT",
-      "Bahagian UMNO", "Status Kelulusan", "Status Pelajar", "Bulan Ke Tamat", "Tarikh Daftar"
+      "Bahagian UMNO", "Peringkat Jawatan", "Jawatan", "Status Kelulusan", "Status Pelajar", "Bulan Ke Tamat", "Tarikh Daftar"
     ];
 
     const csvEscape = (value: unknown) => {
@@ -290,6 +315,8 @@ export default function MemberManagementPage() {
       m.graduation_year,
       m.ipt_zone,
       m.umno_division,
+      m.position_level === "nasional" ? "Nasional" : "IPT",
+      m.member_position || "Ahli IPT",
       m.status,
       studentStatus(m) === "alumni" ? "Alumni" : "Pelajar Aktif",
       studentStatus(m) === "alumni" ? "" : Math.max(0, monthsUntilGraduation(m)),
@@ -422,6 +449,7 @@ export default function MemberManagementPage() {
                   <th>IPT</th>
                   <th>Zon</th>
                   <th>Bahagian</th>
+                  <th>Jawatan</th>
                   <th>No. Ahli UMNO</th>
                   <th>IC</th>
                   <th>Status Kelulusan</th>
@@ -449,6 +477,10 @@ export default function MemberManagementPage() {
                     </td>
                     <td>{m.ipt_zone}</td>
                     <td>{m.umno_division}</td>
+                    <td>
+                      <strong>{m.member_position || "Ahli IPT"}</strong>
+                      <small>{m.position_level === "nasional" ? "Nasional" : "IPT"}</small>
+                    </td>
                     <td>{m.umno_member_no}</td>
                     <td>{maskIC(m.ic_number)}</td>
                     <td>
@@ -488,7 +520,7 @@ export default function MemberManagementPage() {
 
                 {!loading && shown.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="member-admin-empty">Tiada rekod ditemui.</td>
+                    <td colSpan={11} className="member-admin-empty">Tiada rekod ditemui.</td>
                   </tr>
                 )}
               </tbody>
@@ -562,6 +594,35 @@ export default function MemberManagementPage() {
                 Zon IPT
                 <select value={String(form.ipt_zone || "")} onChange={e=>setForm({...form,ipt_zone:e.target.value})}>
                   {ZONES.map(z=><option key={z} value={z}>{z}</option>)}
+                </select>
+              </label>
+
+              <label>
+                Peringkat Jawatan
+                <select
+                  value={String(form.position_level || "ipt")}
+                  onChange={e=>{
+                    const level = e.target.value as "nasional" | "ipt";
+                    setForm({
+                      ...form,
+                      position_level: level,
+                      member_position: level === "nasional" ? "Presiden" : "Ahli IPT"
+                    });
+                  }}
+                >
+                  <option value="ipt">IPT</option>
+                  {me?.role === "super_admin" && <option value="nasional">Nasional</option>}
+                </select>
+              </label>
+
+              <label>
+                Jawatan
+                <select
+                  value={String(form.member_position || "Ahli IPT")}
+                  onChange={e=>setForm({...form,member_position:e.target.value})}
+                >
+                  {(form.position_level === "nasional" ? NATIONAL_POSITIONS : IPT_POSITIONS)
+                    .map(position=><option key={position} value={position}>{position}</option>)}
                 </select>
               </label>
 

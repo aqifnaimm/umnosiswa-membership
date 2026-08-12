@@ -59,6 +59,25 @@ function normalizeUmnoNo(value: string) {
   return String(value || "").trim().toUpperCase().replace(/\s+/g, "");
 }
 
+const NATIONAL_POSITIONS = [
+  "Presiden",
+  "Timbalan Presiden",
+  "Setiausaha Agung",
+  "Bendahari Kehormat",
+  "Ketua Penerangan",
+  "Ketua Siswi"
+];
+
+const IPT_POSITIONS = [
+  "Pengerusi IPT",
+  "Timbalan Pengerusi IPT",
+  "Setiausaha IPT",
+  "Bendahari IPT",
+  "Ketua Penerangan IPT",
+  "AJK IPT",
+  "Ahli IPT"
+];
+
 export async function GET(req: Request) {
   try {
     const me = await current(req);
@@ -136,7 +155,9 @@ export async function PATCH(req: Request) {
       graduation_month: body.graduation_month ? Number(body.graduation_month) : null,
       graduation_year: Number(body.graduation_year),
       ipt_zone: String(body.ipt_zone || "").trim(),
-      umno_division: String(body.umno_division || "").trim()
+      umno_division: String(body.umno_division || "").trim(),
+      position_level: String(body.position_level || "ipt").trim().toLowerCase(),
+      member_position: String(body.member_position || "Ahli IPT").trim()
     };
 
     if (
@@ -160,6 +181,25 @@ export async function PATCH(req: Request) {
       !patch.umno_division
     ) {
       return NextResponse.json({ error: "Semua medan ahli mesti diisi." }, { status: 400 });
+    }
+
+    if (!["nasional", "ipt"].includes(patch.position_level)) {
+      return NextResponse.json({ error: "Peringkat jawatan tidak sah." }, { status: 400 });
+    }
+
+    const validPositions =
+      patch.position_level === "nasional" ? NATIONAL_POSITIONS : IPT_POSITIONS;
+
+    if (!validPositions.includes(patch.member_position)) {
+      return NextResponse.json({ error: "Jawatan ahli tidak sah." }, { status: 400 });
+    }
+
+    // Jawatan Nasional hanya boleh ditetapkan oleh Pentadbir Utama.
+    if (me.role === "admin" && patch.position_level === "nasional") {
+      return NextResponse.json(
+        { error: "Hanya Pentadbir Utama boleh menetapkan Jawatan Nasional." },
+        { status: 403 }
+      );
     }
 
     if (me.role === "admin" && patch.ipt_name !== me.ipt_scope) {
@@ -230,7 +270,9 @@ export async function PATCH(req: Request) {
           graduation_month: before.graduation_month,
           graduation_year: before.graduation_year,
           ipt_zone: before.ipt_zone,
-          umno_division: before.umno_division
+          umno_division: before.umno_division,
+          position_level: before.position_level,
+          member_position: before.member_position
         },
         after: patch
       }
@@ -306,6 +348,8 @@ export async function DELETE(req: Request) {
         graduation_year: member.graduation_year,
         ipt_zone: member.ipt_zone,
         umno_division: member.umno_division,
+        position_level: member.position_level,
+        member_position: member.member_position,
         status: member.status,
         deleted_by_role: me.role
       }
