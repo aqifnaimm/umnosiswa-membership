@@ -52,7 +52,6 @@ async function notifyAdminsOfNewApplication(
       (admins || [])
         .filter((admin: any) => {
           if (!admin.email) return false;
-          if (admin.role === "super_admin") return true;
           return (
             admin.role === "admin" &&
             String(admin.ipt_scope || "").trim().toUpperCase() === applicantIpt
