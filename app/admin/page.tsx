@@ -311,7 +311,7 @@ export default function AdminPage() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Masukkan kata laluan"
                 onKeyDown={e => {
-                  if (e.key === "Enter" && email && password && !loading) login();
+                  if (e.key === "Enter" && username && password && !loading) login();
                 }}
               />
               <button type="button" className="admin-eye-btn" onClick={() => setShowPassword(v => !v)}>
@@ -319,7 +319,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <button className="admin-login-btn" disabled={!email || !password || loading} onClick={login}>
+            <button className="admin-login-btn" disabled={!username || !password || loading} onClick={login}>
               <span>{loading ? "Menyemak..." : "Log Masuk"}</span>
               <span>→</span>
             </button>
