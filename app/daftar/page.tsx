@@ -4,6 +4,10 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 
 const zones = ["Utara", "Lembah Klang", "Selatan", "Pantai Timur", "Sabah", "Sarawak"];
+const months = [
+  "Januari", "Februari", "Mac", "April", "Mei", "Jun",
+  "Julai", "Ogos", "September", "Oktober", "November", "Disember"
+];
 
 export default function RegisterPage() {
   const [message, setMessage] = useState("");
@@ -83,6 +87,16 @@ export default function RegisterPage() {
             <div className="field full">
               <label>Institusi Pengajian Tinggi (IPT)</label>
               <input name="ipt_name" required placeholder="Contoh: IIUM / UIAM" />
+            </div>
+
+            <div className="field">
+              <label>Bulan Tamat Pengajian</label>
+              <select name="graduation_month" required defaultValue="">
+                <option value="" disabled>Pilih bulan</option>
+                {months.map((month, index) => (
+                  <option key={month} value={index + 1}>{month}</option>
+                ))}
+              </select>
             </div>
 
             <div className="field">
