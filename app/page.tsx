@@ -7,41 +7,22 @@ type HomeStats = {
 };
 
 async function getHomeStats(): Promise<HomeStats> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !anon) {
-    return { activeMembers: 0, institutions: 0 };
-  }
-
   try {
-    const res = await fetch(
-      `${url}/rest/v1/membership_applications?select=ipt_name&status=eq.approved`,
-      {
-        headers: {
-          apikey: anon,
-          Authorization: `Bearer ${anon}`
-        },
-        next: { revalidate: 60 }
-      }
-    );
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : "http://localhost:3000";
+
+    const res = await fetch(`${baseUrl}/api/stats`, {
+      next: { revalidate: 60 }
+    });
 
     if (!res.ok) {
       return { activeMembers: 0, institutions: 0 };
     }
 
-    const rows: Array<{ ipt_name: string | null }> = await res.json();
-
-    const institutions = new Set(
-      rows
-        .map(row => String(row.ipt_name || "").trim().toLowerCase())
-        .filter(Boolean)
-    ).size;
-
-    return {
-      activeMembers: rows.length,
-      institutions
-    };
+    return await res.json();
   } catch {
     return { activeMembers: 0, institutions: 0 };
   }
@@ -49,7 +30,6 @@ async function getHomeStats(): Promise<HomeStats> {
 
 export default async function HomePage() {
   const stats = await getHomeStats();
-
   return (
     <main className="homev3-shell">
       <nav className="homev3-nav">
