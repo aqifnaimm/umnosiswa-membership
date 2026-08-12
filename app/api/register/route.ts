@@ -29,7 +29,7 @@ function maskIC(value: unknown) {
 }
 
 async function notifyAdminsOfNewApplication(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   application: any
 ) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -61,7 +61,7 @@ async function notifyAdminsOfNewApplication(
         .map((admin: any) => String(admin.email).trim().toLowerCase())
         .filter(Boolean)
     )
-  );
+  ) as string[];
 
   if (!recipients.length) {
     throw new Error(`Tiada pentadbir aktif ditemui untuk IPT ${applicantIpt}.`);
@@ -87,23 +87,14 @@ async function notifyAdminsOfNewApplication(
         <div style="max-width:680px;margin:0 auto;padding:32px 16px;">
           <div style="background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e7e9ee;">
             <div style="background:#071b3a;padding:28px 32px;text-align:center;">
-              <div style="font-size:13px;letter-spacing:2px;font-weight:700;color:#ffffff;">
-                UMNOSISWA MALAYSIA
-              </div>
-              <div style="margin-top:8px;font-size:12px;color:#c8d4e6;">
-                PERMOHONAN KEAHLIAN BAHARU
-              </div>
+              <div style="font-size:13px;letter-spacing:2px;font-weight:700;color:#ffffff;">UMNOSISWA MALAYSIA</div>
+              <div style="margin-top:8px;font-size:12px;color:#c8d4e6;">PERMOHONAN KEAHLIAN BAHARU</div>
             </div>
-
             <div style="padding:34px 32px;">
-              <h1 style="margin:0 0 14px;font-size:25px;line-height:1.3;color:#071b3a;">
-                Permohonan baharu memerlukan semakan
-              </h1>
-
+              <h1 style="margin:0 0 14px;font-size:25px;line-height:1.3;color:#071b3a;">Permohonan baharu memerlukan semakan</h1>
               <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#4b5563;">
                 Satu permohonan keahlian UMNOSiswa Malaysia telah diterima dan kini berstatus Dalam Semakan.
               </p>
-
               <div style="background:#f7f8fa;border-radius:14px;padding:20px;">
                 <table style="width:100%;border-collapse:collapse;font-size:14px;">
                   <tr><td style="padding:7px 0;color:#6b7280;width:38%;">Nama</td><td style="padding:7px 0;font-weight:700;">${fullName}</td></tr>
@@ -118,25 +109,9 @@ async function notifyAdminsOfNewApplication(
                   <tr><td style="padding:7px 0;color:#6b7280;">Tamat Pengajian</td><td style="padding:7px 0;">Bulan ${graduationMonth}, ${graduationYear}</td></tr>
                 </table>
               </div>
-
               <div style="text-align:center;margin:28px 0 10px;">
-                <a
-                  href="${adminUrl}"
-                  style="display:inline-block;background:#b5121b;color:#ffffff;text-decoration:none;font-weight:700;padding:14px 24px;border-radius:10px;"
-                >
-                  Semak Permohonan
-                </a>
+                <a href="${adminUrl}" style="display:inline-block;background:#b5121b;color:#ffffff;text-decoration:none;font-weight:700;padding:14px 24px;border-radius:10px;">Semak Permohonan</a>
               </div>
-
-              <p style="margin:22px 0 0;font-size:12px;line-height:1.7;color:#6b7280;">
-                Log masuk ke Papan Pemuka Pentadbir untuk meluluskan atau menolak permohonan ini.
-              </p>
-            </div>
-
-            <div style="padding:20px 32px;background:#f7f8fa;border-top:1px solid #eceff3;">
-              <p style="margin:0;font-size:12px;line-height:1.6;color:#7b8492;text-align:center;">
-                Notifikasi automatik Portal Keahlian UMNOSiswa Malaysia.
-              </p>
             </div>
           </div>
         </div>
@@ -161,15 +136,9 @@ async function notifyAdminsOfNewApplication(
   });
 
   const result = await response.json().catch(() => ({}));
-
   if (!response.ok) {
-    throw new Error(
-      result?.message ||
-      result?.error ||
-      `Resend gagal menghantar notifikasi (${response.status}).`
-    );
+    throw new Error(result?.message || result?.error || `Resend gagal menghantar notifikasi (${response.status}).`);
   }
-
   return { result, recipients };
 }
 
@@ -383,21 +352,12 @@ export async function POST(req: Request) {
 
     try {
       const notification = await notifyAdminsOfNewApplication(supabase, application);
-      adminNotification = {
-        sent: true,
-        recipients: notification.recipients
-      };
+      adminNotification = { sent: true, recipients: notification.recipients };
     } catch (notificationError: any) {
-      console.error(
-        "Notifikasi permohonan baharu gagal:",
-        notificationError?.message || notificationError
-      );
+      console.error("Notifikasi permohonan baharu gagal:", notificationError?.message || notificationError);
     }
 
-    return NextResponse.json({
-      ok: true,
-      admin_notification: adminNotification
-    });
+    return NextResponse.json({ ok: true, admin_notification: adminNotification });
   } catch (e: any) {
     return NextResponse.json(
       { error: e?.message || "Permintaan tidak sah." },
