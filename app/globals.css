@@ -2238,3 +2238,66 @@ linear-gradient(180deg,rgba(3,8,15,.2),rgba(3,8,15,.68))}
 @media(max-width:580px){
   .homev3-stat-grid-four{grid-template-columns:1fr}
 }
+
+/* ===== Homepage Scroll Reveal Animation ===== */
+.homev3-scroll-reveal{
+  opacity:0;
+  transform:translate3d(0,42px,0);
+  filter:blur(3px);
+  transition:
+    opacity .75s cubic-bezier(.22,1,.36,1),
+    transform .85s cubic-bezier(.22,1,.36,1),
+    filter .75s ease;
+  will-change:opacity,transform;
+}
+
+.homev3-scroll-reveal.is-visible{
+  opacity:1;
+  transform:translate3d(0,0,0);
+  filter:blur(0);
+}
+
+.homev3-scroll-reveal .homev3-mini-grid > div,
+.homev3-scroll-reveal .homev3-stat-grid > article,
+.homev3-scroll-reveal .homev3-card-preview-points > div{
+  opacity:0;
+  transform:translateY(20px);
+  transition:
+    opacity .55s ease,
+    transform .65s cubic-bezier(.22,1,.36,1);
+}
+
+.homev3-scroll-reveal.is-visible .homev3-mini-grid > div,
+.homev3-scroll-reveal.is-visible .homev3-stat-grid > article,
+.homev3-scroll-reveal.is-visible .homev3-card-preview-points > div{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.homev3-scroll-reveal.is-visible .homev3-mini-grid > div:nth-child(1),
+.homev3-scroll-reveal.is-visible .homev3-stat-grid > article:nth-child(1),
+.homev3-scroll-reveal.is-visible .homev3-card-preview-points > div:nth-child(1){transition-delay:.10s}
+
+.homev3-scroll-reveal.is-visible .homev3-mini-grid > div:nth-child(2),
+.homev3-scroll-reveal.is-visible .homev3-stat-grid > article:nth-child(2),
+.homev3-scroll-reveal.is-visible .homev3-card-preview-points > div:nth-child(2){transition-delay:.18s}
+
+.homev3-scroll-reveal.is-visible .homev3-mini-grid > div:nth-child(3),
+.homev3-scroll-reveal.is-visible .homev3-stat-grid > article:nth-child(3),
+.homev3-scroll-reveal.is-visible .homev3-card-preview-points > div:nth-child(3){transition-delay:.26s}
+
+.homev3-scroll-reveal.is-visible .homev3-mini-grid > div:nth-child(4),
+.homev3-scroll-reveal.is-visible .homev3-stat-grid > article:nth-child(4){transition-delay:.34s}
+
+@media (prefers-reduced-motion: reduce){
+  .homev3-scroll-reveal,
+  .homev3-scroll-reveal .homev3-mini-grid > div,
+  .homev3-scroll-reveal .homev3-stat-grid > article,
+  .homev3-scroll-reveal .homev3-card-preview-points > div{
+    opacity:1 !important;
+    transform:none !important;
+    filter:none !important;
+    transition:none !important;
+  }
+}
+

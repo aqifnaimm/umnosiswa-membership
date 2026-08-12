@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import ScrollReveal from "./ScrollReveal";
 
 type HomeStats = {
   activeStudents: number;
@@ -153,7 +154,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section id="tentang" className="homev3-about">
+      <ScrollReveal className="homev3-reveal-section">\n      <section id="tentang" className="homev3-about">
         <div className="homev3-container homev3-about-grid">
           <div className="homev3-about-copy">
             <span className="homev3-kicker">TENTANG UMNOSISWA</span>
@@ -190,9 +191,9 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </section>\n      </ScrollReveal>
 
-      <section id="aktiviti" className="homev3-activity">
+      <ScrollReveal className="homev3-reveal-section">\n      <section id="aktiviti" className="homev3-activity">
         <div className="homev3-container homev3-activity-grid">
           <div className="homev3-activity-image">
             <Image
@@ -224,10 +225,10 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </section>\n      </ScrollReveal>
 
 
-      <section className="homev3-card-preview">
+      <ScrollReveal className="homev3-reveal-section">\n      <section className="homev3-card-preview">
         <div className="homev3-container homev3-card-preview-grid">
           <div className="homev3-card-preview-copy">
             <span className="homev3-kicker">KAD AHLI DIGITAL</span>
@@ -290,9 +291,9 @@ export default async function HomePage() {
             <div className="homev3-card-shadow-card" />
           </div>
         </div>
-      </section>
+      </section>\n      </ScrollReveal>
 
-      <section id="statistik" className="homev3-stats">
+      <ScrollReveal className="homev3-reveal-section">\n      <section id="statistik" className="homev3-stats">
         <div className="homev3-container">
           <div className="homev3-section-head">
             <span className="homev3-kicker">STATISTIK KEAHLIAN</span>
@@ -309,9 +310,9 @@ export default async function HomePage() {
             <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
           </div>
         </div>
-      </section>
+      </section>\n      </ScrollReveal>
 
-      <section className="homev3-cta">
+      <ScrollReveal className="homev3-reveal-section">\n      <section className="homev3-cta">
         <div className="homev3-container">
           <div className="homev3-cta-card">
             <div>
@@ -325,7 +326,7 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </section>\n      </ScrollReveal>
 
       <footer className="homev3-footer">
         <div className="homev3-container homev3-footer-inner">
