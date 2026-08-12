@@ -63,7 +63,8 @@ export default function RegisterPage() {
     setMessage("");
     setError("");
 
-    const form = new FormData(e.currentTarget);
+    const formElement = e.currentTarget;
+    const form = new FormData(formElement);
     const payload = Object.fromEntries(form.entries());
 
     try {
@@ -76,7 +77,7 @@ export default function RegisterPage() {
 
       if (!res.ok) throw new Error(data.error || "Pendaftaran gagal.");
       setMessage("Permohonan berjaya dihantar. Status anda kini Pending.");
-      e.currentTarget.reset();
+      formElement.reset();
       setSelectedIpt("");
     } catch (err: any) {
       setError(err.message || "Pendaftaran gagal.");
