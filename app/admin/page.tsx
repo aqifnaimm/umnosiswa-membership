@@ -373,6 +373,13 @@ export default function AdminPage() {
               >
                 Pengurusan Data Ahli →
               </Link>
+              <Link
+                href="/admin/analytics"
+                className="admin-refresh-btn"
+                style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}
+              >
+                Analytics ↗
+              </Link>
               {profile.role === "super_admin" && (
                 <Link
                   href="/admin/settings"

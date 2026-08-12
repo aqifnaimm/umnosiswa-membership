@@ -2461,3 +2461,22 @@ linear-gradient(180deg,rgba(3,8,15,.2),rgba(3,8,15,.68))}
   .verify-member-name{font-size:19px}
 }
 
+/* ===== UMNOSiswa Analytics ===== */
+.analytics-shell{min-height:100vh;padding:38px 0 70px;background:#f3f4f6;color:#17191d}
+.analytics-wrap{width:min(1240px,calc(100% - 30px));margin:auto}
+.analytics-header{display:flex;justify-content:space-between;align-items:center;gap:22px;padding:28px 32px;border-radius:22px;background:linear-gradient(115deg,#0b1220,#111827 60%,#681c27);color:#fff}
+.analytics-header>div>span,.analytics-card-head span{color:#ef5358;font-size:10px;font-weight:900;letter-spacing:.15em}
+.analytics-header h1{font-size:36px;margin:6px 0}.analytics-header p{margin:0;color:#aeb5c1}
+.analytics-header-actions{display:flex;gap:9px;align-items:center}.analytics-header select,.analytics-header a{border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;border-radius:10px;padding:11px 13px;text-decoration:none}
+.analytics-header select option{color:#111}
+.analytics-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:18px 0}
+.analytics-stats>div{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:18px}.analytics-stats span{display:block;font-size:10px;color:#777;text-transform:uppercase}.analytics-stats strong{display:block;font-size:27px;margin-top:5px}
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.analytics-card{background:#fff;border:1px solid #e3e6ea;border-radius:18px;padding:23px}.analytics-wide{grid-column:1/-1}.analytics-card h2{font-size:20px;margin:5px 0 0}
+.analytics-month-chart{height:250px;display:grid;grid-template-columns:repeat(12,1fr);gap:8px;align-items:end;margin-top:20px}.analytics-month-col{text-align:center;height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}.analytics-month-col strong{font-size:11px}.analytics-month-track{height:180px;background:#f1f3f5;border-radius:7px;display:flex;align-items:flex-end;overflow:hidden}.analytics-month-track div{width:100%;background:#d6322f;border-radius:7px 7px 0 0}.analytics-month-col small{font-size:9px;color:#777}
+.analytics-status-big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:25px}.analytics-status-big>div{padding:22px;background:#f8f9fb;border-radius:13px}.analytics-status-big strong{display:block;font-size:34px}.analytics-status-big span{font-size:11px;color:#777}.analytics-split{height:8px;background:#eee;border-radius:99px;margin-top:16px;overflow:hidden}.analytics-split div{height:100%;background:#111827}
+.analytics-list{display:flex;flex-direction:column;gap:13px;margin-top:20px}.analytics-list-label{display:flex;justify-content:space-between;gap:15px;font-size:11px}.analytics-list-label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.analytics-bar-track{height:6px;background:#f0f1f3;border-radius:99px;margin-top:6px;overflow:hidden}.analytics-bar-fill{height:100%;background:#d6322f;border-radius:99px}
+.analytics-loading,.analytics-error{width:min(700px,calc(100% - 30px));margin:80px auto;padding:25px;background:#fff;border-radius:15px;text-align:center}.analytics-error{margin:15px auto;color:#b42318}
+@media(max-width:900px){.analytics-stats{grid-template-columns:repeat(3,1fr)}.analytics-grid{grid-template-columns:1fr}.analytics-wide{grid-column:auto}}
+@media(max-width:600px){.analytics-header{flex-direction:column;align-items:flex-start}.analytics-header-actions{flex-wrap:wrap}.analytics-stats{grid-template-columns:repeat(2,1fr)}.analytics-month-chart{overflow-x:auto;grid-template-columns:repeat(12,55px)}}
+
+
