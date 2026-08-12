@@ -34,12 +34,14 @@ function studentStatus(month: number | null, year: number | null) {
 export default async function VerifyPage({
   params
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  const membershipId = decodeURIComponent(params.id || "")
+  const membershipId = decodeURIComponent(id || "")
     .trim()
     .toUpperCase();
 
@@ -47,10 +49,13 @@ export default async function VerifyPage({
 
   if (url && key && membershipId) {
     const supabase = createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false }
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      }
     });
 
-    const result = await supabase
+    const { data: member, error } = await supabase
       .from("membership_applications")
       .select(
         "full_name,membership_id,ipt_name,ipt_zone,umno_division,status,graduation_month,graduation_year"
@@ -58,7 +63,11 @@ export default async function VerifyPage({
       .eq("membership_id", membershipId)
       .maybeSingle();
 
-    data = result.data;
+    if (error) {
+      console.error("Verify membership error:", error.message);
+    } else {
+      data = member;
+    }
   }
 
   const valid = Boolean(
