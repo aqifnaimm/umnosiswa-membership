@@ -13,6 +13,8 @@ type Member = {
   student_status: "active_student" | "alumni";
   ipt_zone: string;
   umno_division: string;
+  position_level: "nasional" | "ipt";
+  member_position: string;
   status: "pending" | "approved" | "rejected";
 };
 
@@ -207,6 +209,8 @@ export default function MemberPortal() {
 
       // Information blocks.
       const info = [
+        ["JAWATAN", member.member_position || "Ahli IPT"],
+        ...(member.position_level === "nasional" ? [] : [["PERINGKAT", "IPT"]]),
         ["IPT", member.ipt_name],
         ["STATUS", member.student_status === "alumni" ? "Alumni" : "Pelajar Aktif"],
         ["TAMAT PENGAJIAN", graduationLabel(member.graduation_month, member.graduation_year)],
@@ -346,6 +350,14 @@ export default function MemberPortal() {
                       <small>KAD KEAHLIAN DIGITAL</small>
                       <h2>{member.full_name}</h2>
                       <div className="member-number">{member.membership_id}</div>
+                      <div style={{marginTop:12,marginBottom:8,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                        <strong style={{color:"#ef4650",fontSize:18,fontWeight:900,letterSpacing:".04em",textTransform:"uppercase"}}>
+                          {member.member_position || "Ahli IPT"}
+                        </strong>
+                        {member.position_level !== "nasional" && (
+                          <span style={{padding:"4px 8px",borderRadius:999,border:"1px solid rgba(255,255,255,.18)",color:"rgba(255,255,255,.68)",fontSize:10,fontWeight:800,letterSpacing:".08em"}}>IPT</span>
+                        )}
+                      </div>
                       <div className="digital-details">
                         <div><span>IPT</span><strong>{member.ipt_name}</strong></div>
                         <div>
