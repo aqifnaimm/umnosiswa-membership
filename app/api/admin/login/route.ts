@@ -42,10 +42,8 @@ export async function POST(req: Request) {
 
     const { root } = clients();
 
-    // The admin creation flow stores the Supabase Auth email as:
-    // username@admin.umnos.internal. We resolve the username here and
-    // return that Auth email to the client, which then signs in with the
-    // password supplied by the admin.
+    // Username digunakan untuk mencari profil pentadbir. E-mel sebenar
+    // daripada admin_users ialah e-mel yang digunakan oleh Supabase Auth.
     const { data: admin, error } = await root
       .from("admin_users")
       .select("auth_user_id,email,username,is_active,role,ipt_scope")
@@ -67,9 +65,34 @@ export async function POST(req: Request) {
       );
     }
 
+    // Migrasi akaun lama secara automatik jika Auth masih menggunakan
+    // e-mel dalaman (*.admin.umnos.internal). Selepas ini Auth akan
+    // menggunakan e-mel sebenar yang disimpan dalam admin_users.
+    const {data:authUser,error:authUserError}=await root.auth.admin.getUserById(admin.auth_user_id);
+    if(authUserError || !authUser.user){
+      return NextResponse.json(
+        { error: "Akaun Supabase Auth pentadbir tidak ditemui." },
+        { status: 401 }
+      );
+    }
+
+    if(admin.email && authUser.user.email?.toLowerCase() !== admin.email.toLowerCase()){
+      const {error:syncError}=await root.auth.admin.updateUserById(admin.auth_user_id,{
+        email:admin.email,
+        email_confirm:true
+      });
+      if(syncError){
+        console.error("Admin Auth email sync error:", syncError.message);
+        return NextResponse.json(
+          { error: "Tidak dapat menyegerakkan e-mel akaun pentadbir." },
+          { status: 500 }
+        );
+      }
+    }
+
     // Never expose the password or service-role credentials. The browser
-    // uses this email only for Supabase Auth sign-in with the password it
-    // already has from the login form.
+    // uses this real email only for Supabase Auth sign-in with the password
+    // already supplied by the admin.
     return NextResponse.json({
       ok: true,
       email: admin.email,

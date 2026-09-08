@@ -99,11 +99,9 @@ export async function POST(req:Request){
     if(existingEmail)
       return NextResponse.json({error:"E-mel pentadbir ini telah digunakan."},{status:409});
 
-    // Kekalkan e-mel dalaman Supabase Auth supaya kaedah login berasaskan username sedia ada tidak berubah.
-    const internalEmail=`${username}@admin.umnos.internal`;
-
+    // Gunakan e-mel sebenar pentadbir sebagai e-mel Supabase Auth.
     const {data:created,error:createError}=await root.auth.admin.createUser({
-      email:internalEmail,
+      email,
       password,
       email_confirm:true
     });
@@ -256,15 +254,14 @@ export async function PATCH(req:Request){
     if(password && password.length<8)
       return NextResponse.json({error:"Kata laluan baharu mesti sekurang-kurangnya 8 aksara."},{status:400});
 
-    const finalUsername=patch.username ?? target.username;
-
-    // Login sedia ada menggunakan e-mel dalaman yang dibina daripada username.
-    // Jika username berubah, kemas kini Supabase Auth identifier juga.
-    if(patch.username!==undefined || password){
+    // E-mel sebenar dalam admin_users mesti sentiasa sepadan dengan
+    // e-mel yang digunakan oleh Supabase Auth. Username hanya digunakan
+    // sebagai identifier untuk log masuk di portal.
+    if(patch.email!==undefined || password){
       const authPatch:any={};
 
-      if(patch.username!==undefined)
-        authPatch.email=`${finalUsername}@admin.umnos.internal`;
+      if(patch.email!==undefined)
+        authPatch.email=patch.email;
 
       if(password)
         authPatch.password=password;
