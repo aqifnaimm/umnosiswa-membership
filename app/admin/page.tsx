@@ -38,6 +38,11 @@ export default function AdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [forgotLoading, setForgotLoading] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [confirmAdminPassword, setConfirmAdminPassword] = useState("");
+  const [changePasswordLoading, setChangePasswordLoading] = useState(false);
 
   useEffect(() => {
     restoreSession();
@@ -270,6 +275,50 @@ export default function AdminPage() {
     }
   }
 
+  async function changeOwnPassword() {
+    if (newAdminPassword.length < 8) {
+      setMsg("Kata laluan baharu mesti sekurang-kurangnya 8 aksara.");
+      return;
+    }
+
+    if (newAdminPassword !== confirmAdminPassword) {
+      setMsg("Pengesahan kata laluan baharu tidak sepadan.");
+      return;
+    }
+
+    setChangePasswordLoading(true);
+    setMsg("");
+
+    try {
+      const token = await getAccessToken();
+      const res = await fetch("/api/admin/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword: newAdminPassword })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMsg(data.error || "Gagal menukar kata laluan.");
+        return;
+      }
+
+      setCurrentPassword("");
+      setNewAdminPassword("");
+      setConfirmAdminPassword("");
+      setShowChangePassword(false);
+      setMsg("Kata laluan anda berjaya ditukar.");
+    } catch {
+      setMsg("Tidak dapat berhubung dengan server.");
+    } finally {
+      setChangePasswordLoading(false);
+    }
+  }
+
   async function logout() {
     await supabase.auth.signOut();
     setProfile(null);
@@ -395,6 +444,50 @@ export default function AdminPage() {
       </header>
 
       <section className="admin-dashboard-body">
+        <div className="admin-account-card">
+          <div>
+            <span className="admin-dash-kicker">AKAUN PENTADBIR</span>
+            <h2>Tetapan Keselamatan</h2>
+            <p>Tukar kata laluan akaun anda pada bila-bila masa.</p>
+          </div>
+          <button
+            type="button"
+            className="admin-refresh-btn"
+            onClick={() => { setShowChangePassword(v => !v); setMsg(""); }}
+          >
+            {showChangePassword ? "Tutup" : "Tukar Kata Laluan"}
+          </button>
+        </div>
+
+        {showChangePassword && (
+          <div className="admin-password-card">
+            <h3>Tukar Kata Laluan</h3>
+            <p className="admin-password-help">Masukkan kata laluan semasa dan kata laluan baharu anda.</p>
+            <div className="admin-password-grid">
+              <div>
+                <label>Kata Laluan Semasa</label>
+                <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} autoComplete="current-password" placeholder="Kata laluan semasa" />
+              </div>
+              <div>
+                <label>Kata Laluan Baharu</label>
+                <input type="password" value={newAdminPassword} onChange={e => setNewAdminPassword(e.target.value)} autoComplete="new-password" placeholder="Minimum 8 aksara" />
+              </div>
+              <div>
+                <label>Sahkan Kata Laluan Baharu</label>
+                <input type="password" value={confirmAdminPassword} onChange={e => setConfirmAdminPassword(e.target.value)} autoComplete="new-password" placeholder="Ulang kata laluan baharu" />
+              </div>
+            </div>
+            <button
+              type="button"
+              className="admin-login-btn admin-password-submit"
+              disabled={!currentPassword || !newAdminPassword || !confirmAdminPassword || changePasswordLoading}
+              onClick={changeOwnPassword}
+            >
+              {changePasswordLoading ? "Menukar..." : "Simpan Kata Laluan Baharu"}
+            </button>
+          </div>
+        )}
+
         <div className="admin-stat-grid">
           <div className="admin-stat-card"><span>Jumlah Permohonan</span><strong>{members.length}</strong></div>
           <div className="admin-stat-card"><span>Dalam Semakan</span><strong>{pending}</strong></div>

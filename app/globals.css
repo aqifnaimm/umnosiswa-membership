@@ -2923,3 +2923,31 @@ linear-gradient(180deg,rgba(3,8,15,.2),rgba(3,8,15,.68))}
   line-height: 1.6;
   text-align: center;
 }
+
+
+.admin-account-card,
+.admin-password-card {
+  background:#fff;
+  border:1px solid #e8ebef;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(16,24,40,.06);
+}
+.admin-account-card {
+  padding:20px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:14px;
+}
+.admin-account-card h2 { margin:5px 0 4px; font-size:20px; }
+.admin-account-card p { margin:0; color:#6b7280; font-size:13px; }
+.admin-password-card { padding:22px; margin-bottom:18px; }
+.admin-password-card h3 { margin:0; font-size:19px; }
+.admin-password-help { margin:6px 0 18px; color:#6b7280; font-size:13px; }
+.admin-password-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.admin-password-grid label { display:block; margin-bottom:7px; font-size:12px; font-weight:800; color:#374151; }
+.admin-password-grid input { width:100%; min-height:44px; padding:0 12px; border:1px solid #d8dde5; border-radius:10px; outline:none; box-sizing:border-box; }
+.admin-password-grid input:focus { border-color:#e51b23; box-shadow:0 0 0 3px rgba(229,27,35,.08); }
+.admin-password-submit { width:auto; min-height:44px; margin-top:16px; padding:0 18px; }
+@media(max-width:800px){ .admin-password-grid{grid-template-columns:1fr;} .admin-account-card{align-items:flex-start;flex-direction:column;} .admin-password-submit{width:100%;} }
