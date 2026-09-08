@@ -36,6 +36,7 @@ type Member = {
 type AdminProfile = {
   email: string;
   role: "super_admin" | "admin";
+  ipt_scope: string | null;
 };
 
 export default function AdminPage() {
@@ -519,7 +520,18 @@ export default function AdminPage() {
             {profile.email} · {profile.role === "super_admin" ? "Pentadbir Utama" : "Admin"}
           </p>
         </div>
-        <button className="admin-logout-btn" onClick={logout}>Log Keluar</button>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",justifyContent:"flex-end"}}>
+          {profile.role === "super_admin" && (
+            <Link
+              href="/admin/logs"
+              className="admin-refresh-btn"
+              style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}
+            >
+              Audit Trail
+            </Link>
+          )}
+          <button className="admin-logout-btn" onClick={logout}>Log Keluar</button>
+        </div>
       </header>
 
       <section className="admin-dashboard-body">
