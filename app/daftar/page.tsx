@@ -33,6 +33,7 @@ const ipts = [
   { name: "UMT", zone: "Pantai Timur" },
   { name: "UMS", zone: "Sabah" },
   { name: "UIAM", zone: "Lembah Klang" }
+  { name: "UTM", zone: "Selatan" }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const months = [
