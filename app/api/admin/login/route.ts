@@ -28,10 +28,72 @@ function clients() {
   };
 }
 
+
+async function validateTurnstileToken(token: string, request: Request) {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+
+  if (!secret) {
+    throw new Error("Turnstile belum dikonfigurasi di server.");
+  }
+
+  const remoteip =
+    request.headers.get("cf-connecting-ip") ||
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    undefined;
+
+  const response = await fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        secret,
+        response: token,
+        ...(remoteip ? { remoteip } : {})
+      }),
+      cache: "no-store"
+    }
+  );
+
+  const result = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result?.success) {
+    console.error("Admin login Turnstile validation failed:", result?.["error-codes"] || response.status);
+    return false;
+  }
+
+  const hostname = String(result.hostname || "").toLowerCase();
+  const allowedHostnames = new Set(["umnosiswa.my", "www.umnosiswa.my"]);
+
+  if (hostname && !allowedHostnames.has(hostname)) {
+    console.error("Admin login Turnstile hostname mismatch:", hostname);
+    return false;
+  }
+
+  return true;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const username = String(body.username || "").trim().toLowerCase();
+    const turnstileToken = String(body.turnstile_token || "").trim();
+
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Pengesahan keselamatan diperlukan. Sila lengkapkan Turnstile." },
+        { status: 400 }
+      );
+    }
+
+    const turnstileValid = await validateTurnstileToken(turnstileToken, req);
+
+    if (!turnstileValid) {
+      return NextResponse.json(
+        { error: "Pengesahan keselamatan gagal. Sila cuba lagi." },
+        { status: 403 }
+      );
+    }
 
     if (!username) {
       return NextResponse.json(

@@ -1,9 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Script from "next/script";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement | string, options: Record<string, unknown>) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+  }
+}
 
 type Member = {
   id: string;
@@ -43,10 +54,39 @@ export default function AdminPage() {
   const [newAdminPassword, setNewAdminPassword] = useState("");
   const [confirmAdminPassword, setConfirmAdminPassword] = useState("");
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   useEffect(() => {
     restoreSession();
   }, []);
+
+  function renderLoginTurnstile() {
+    if (!turnstileSiteKey || !turnstileRef.current || !window.turnstile || turnstileWidgetId.current) return;
+
+    turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: turnstileSiteKey,
+      theme: "auto",
+      callback: (token: string) => setTurnstileToken(token),
+      "expired-callback": () => {
+        setTurnstileToken("");
+        if (turnstileWidgetId.current) window.turnstile?.reset(turnstileWidgetId.current);
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+      }
+    });
+  }
+
+  function resetLoginTurnstile() {
+    setTurnstileToken("");
+    if (turnstileWidgetId.current) {
+      window.turnstile?.reset(turnstileWidgetId.current);
+    }
+  }
+
 
   async function getAccessToken() {
     const { data } = await supabase.auth.getSession();
@@ -66,8 +106,19 @@ export default function AdminPage() {
   }
 
   async function login() {
-    setLoading(true);
     setMsg("");
+
+    if (!turnstileSiteKey) {
+      setMsg("Turnstile belum dikonfigurasi. Sila cuba lagi sebentar lagi.");
+      return;
+    }
+
+    if (!turnstileToken) {
+      setMsg("Sila lengkapkan pengesahan keselamatan sebelum log masuk.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/admin/login", {
@@ -75,9 +126,12 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: username.trim(),
-          password
+          password,
+          turnstile_token: turnstileToken
         })
       });
+
+      resetLoginTurnstile();
 
       const result = await res.json();
 
@@ -402,7 +456,14 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <button className="admin-login-btn" disabled={!username || !password || loading || forgotLoading} onClick={login}>
+            <div ref={turnstileRef} style={{ marginTop: 18, display: "flex", justifyContent: "center", minHeight: 65 }} />
+            <Script
+              src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+              strategy="afterInteractive"
+              onLoad={renderLoginTurnstile}
+            />
+
+            <button className="admin-login-btn" disabled={!username || !password || !turnstileToken || loading || forgotLoading} onClick={login}>
               <span>{loading ? "Menyemak..." : "Log Masuk"}</span>
               <span>→</span>
             </button>
