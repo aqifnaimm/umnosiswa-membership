@@ -389,16 +389,38 @@ export default async function HomePage() {
       <ScrollReveal className="homev3-reveal-section">
       <section id="pendaftaran" className="homev3-cta">
         <div className="homev3-container">
-          <div className="homev3-cta-card">
-            <div>
-              <span className="homev3-kicker">SERTAI UMNOSISWA</span>
-              <h2>Mulakan pendaftaran anda.</h2>
-              <p>Sediakan No. Ahli UMNO, maklumat IPT, zon IPT dan Bahagian UMNO.</p>
+          <div className="homev3-cta-grid">
+            <div className="homev3-cta-card">
+              <div>
+                <span className="homev3-kicker">SERTAI UMNOSISWA</span>
+                <h2>Mulakan pendaftaran anda.</h2>
+                <p>Sediakan No. Ahli UMNO, maklumat IPT, zon IPT dan Bahagian UMNO.</p>
+              </div>
+              <div className="homev3-cta-actions">
+                <Link href="/daftar" className="homev3-primary-btn">
+                  Daftar Sekarang
+                  <span>→</span>
+                </Link>
+              </div>
             </div>
-            <Link href="/daftar" className="homev3-primary-btn">
-              Daftar Sekarang
-              <span>→</span>
-            </Link>
+
+            <div className="homev3-cta-card homev3-social-card">
+              <div>
+                <span className="homev3-kicker">MEDIA SOSIAL</span>
+                <h2>Ikuti kami di Instagram.</h2>
+                <p>Dapatkan perkembangan terkini, aktiviti dan maklumat UMNOSiswa Malaysia.</p>
+              </div>
+              <div className="homev3-cta-actions">
+                <a
+                  href="https://www.instagram.com/mahasiswaumno/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="homev3-instagram-link homev3-instagram-button"
+                >
+                  Instagram <strong>@mahasiswaumno</strong> <span>↗</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
