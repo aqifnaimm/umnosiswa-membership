@@ -395,10 +395,21 @@ export default async function HomePage() {
               <h2>Mulakan pendaftaran anda.</h2>
               <p>Sediakan No. Ahli UMNO, maklumat IPT, zon IPT dan Bahagian UMNO.</p>
             </div>
-            <Link href="/daftar" className="homev3-primary-btn">
-              Daftar Sekarang
-              <span>→</span>
-            </Link>
+            <div className="homev3-cta-actions">
+              <Link href="/daftar" className="homev3-primary-btn">
+                Daftar Sekarang
+                <span>→</span>
+              </Link>
+              <a
+                href="https://www.instagram.com/mahasiswaumno/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="homev3-instagram-link"
+              >
+                Layari Media Sosial Instagram Kami <strong>@mahasiswaumno</strong>
+                <span>↗</span>
+              </a>
+            </div>
           </div>
         </div>
       </section>
