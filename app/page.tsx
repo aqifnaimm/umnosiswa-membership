@@ -416,8 +416,22 @@ export default async function HomePage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="homev3-instagram-link homev3-instagram-button"
+                  aria-label="Layari Instagram UMNOSiswa Malaysia"
                 >
-                  Instagram <strong>@mahasiswaumno</strong> <span>↗</span>
+                  <svg className="homev3-instagram-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="instagramGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#f58529" />
+                        <stop offset="35%" stopColor="#dd2a7b" />
+                        <stop offset="70%" stopColor="#8134af" />
+                        <stop offset="100%" stopColor="#515bd4" />
+                      </linearGradient>
+                    </defs>
+                    <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="url(#instagramGradient)" strokeWidth="2" />
+                    <circle cx="12" cy="12" r="4.1" fill="none" stroke="url(#instagramGradient)" strokeWidth="2" />
+                    <circle cx="17.4" cy="6.7" r="1.15" fill="url(#instagramGradient)" />
+                  </svg>
+                  Layari Instagram Kami <span>↗</span>
                 </a>
               </div>
             </div>
