@@ -25,6 +25,9 @@ type Member = {
 
 const ZONES = ["Utara","Lembah Klang","Selatan","Pantai Timur","Sabah","Sarawak"];
 
+const IPTS = ["UM","UKM","UMPSA","UMK","UNIMAP","UNISZA","USIM","UNIKL","UITM","UTHM","UPSI","USM","UPM","UUM","UTEM","UMT","UMS","UIAM","UTM"];
+
+
 const NATIONAL_POSITIONS = [
   "Presiden",
   "Timbalan Presiden",
@@ -569,7 +572,10 @@ export default function MemberManagementPage() {
 
               <label>
                 IPT
-                <input value={String(form.ipt_name || "")} onChange={e=>setForm({...form,ipt_name:e.target.value})}/>
+                <select value={String(form.ipt_name || "")} onChange={e=>setForm({...form,ipt_name:e.target.value})}>
+                  <option value="">Pilih IPT</option>
+                  {IPTS.map(ipt=><option key={ipt} value={ipt}>{ipt}</option>)}
+                </select>
               </label>
 
               <label>
