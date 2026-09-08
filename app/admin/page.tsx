@@ -30,6 +30,7 @@ type Member = {
   umno_division: string;
   status: "pending" | "approved" | "rejected";
   membership_id: string | null;
+  created_at: string;
 };
 
 type AdminProfile = {
@@ -490,6 +491,23 @@ export default function AdminPage() {
   const pending = members.filter(m => m.status === "pending").length;
   const approved = members.filter(m => m.status === "approved").length;
   const rejected = members.filter(m => m.status === "rejected").length;
+  const MONTHS = ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"];
+  const isAlumni = (m: Member) => {
+    if (m.status !== "approved" || !m.graduation_year) return false;
+    const now = new Date();
+    const month = m.graduation_month || 12;
+    return m.graduation_year < now.getFullYear() ||
+      (m.graduation_year === now.getFullYear() && month < now.getMonth() + 1);
+  };
+  const activeStudents = members.filter(m => m.status === "approved" && !isAlumni(m)).length;
+  const alumni = members.filter(isAlumni).length;
+  const registrationTrend = Array(12).fill(0);
+  members.forEach(m => {
+    const d = new Date(m.created_at);
+    if (!Number.isNaN(d.getTime())) registrationTrend[d.getMonth()]++;
+  });
+  const maxRegistration = Math.max(...registrationTrend, 1);
+  const totalMembers = approved;
 
   return (
     <main className="admin-dashboard-shell">
@@ -547,6 +565,62 @@ export default function AdminPage() {
               {changePasswordLoading ? "Menukar..." : "Simpan Kata Laluan Baharu"}
             </button>
           </div>
+        )}
+
+        {profile.role === "admin" && profile.ipt_scope && (
+          <section className="ipt-dashboard-section">
+            <div className="ipt-dashboard-heading">
+              <div>
+                <span className="admin-dash-kicker">DASHBOARD IPT</span>
+                <h2>{profile.ipt_scope}</h2>
+                <p>Ringkasan keahlian dan permohonan untuk IPT anda sahaja.</p>
+              </div>
+              <Link href="/admin/analytics" className="admin-refresh-btn" style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}>
+                Analitik Penuh ↗
+              </Link>
+            </div>
+
+            <div className="ipt-kpi-grid">
+              <div className="ipt-kpi-card"><span>Total Members</span><strong>{totalMembers}</strong><small>Keahlian diluluskan</small></div>
+              <div className="ipt-kpi-card"><span>Active Students</span><strong>{activeStudents}</strong><small>Pelajar aktif</small></div>
+              <div className="ipt-kpi-card"><span>Alumni</span><strong>{alumni}</strong><small>Bekas pelajar</small></div>
+              <div className="ipt-kpi-card"><span>Pending Applications</span><strong>{pending}</strong><small>Menunggu semakan</small></div>
+              <div className="ipt-kpi-card"><span>Rejected</span><strong>{rejected}</strong><small>Permohonan ditolak</small></div>
+            </div>
+
+            <div className="ipt-dashboard-grid">
+              <article className="ipt-chart-card ipt-chart-wide">
+                <div className="ipt-card-head"><div><span>REGISTRATION TREND</span><h3>Pendaftaran Mengikut Bulan</h3></div></div>
+                <div className="ipt-month-chart">
+                  {registrationTrend.map((value, i) => (
+                    <div className="ipt-month-column" key={MONTHS[i]}>
+                      <strong>{value}</strong>
+                      <div className="ipt-month-track"><div style={{height:`${value ? Math.max((value/maxRegistration)*100,5) : 0}%`}} /></div>
+                      <small>{MONTHS[i]}</small>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="ipt-chart-card">
+                <div className="ipt-card-head"><div><span>STUDENT STATUS</span><h3>Active vs Alumni</h3></div></div>
+                <div className="ipt-status-grid">
+                  <div><strong>{activeStudents}</strong><span>Active Students</span></div>
+                  <div><strong>{alumni}</strong><span>Alumni</span></div>
+                </div>
+                <div className="ipt-split-track"><div style={{width:`${approved ? (activeStudents/approved)*100 : 0}%`}} /></div>
+              </article>
+
+              <article className="ipt-chart-card">
+                <div className="ipt-card-head"><div><span>APPLICATION STATUS</span><h3>Status Permohonan</h3></div></div>
+                <div className="ipt-status-list">
+                  <div><span><i className="ipt-dot approved" /> Diluluskan</span><strong>{approved}</strong></div>
+                  <div><span><i className="ipt-dot pending" /> Dalam Semakan</span><strong>{pending}</strong></div>
+                  <div><span><i className="ipt-dot rejected" /> Ditolak</span><strong>{rejected}</strong></div>
+                </div>
+              </article>
+            </div>
+          </section>
         )}
 
         <div className="admin-stat-grid">
