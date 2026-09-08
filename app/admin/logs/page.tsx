@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
@@ -8,142 +8,174 @@ type Log = {
   id: number;
   admin_email: string | null;
   action: string;
-  target_application_id: string | null;
   metadata: any;
   created_at: string;
 };
 
-export default function AuditLogsPage(){
-  const [logs,setLogs]=useState<Log[]>([]);
-  const [me,setMe]=useState<any>(null);
-  const [q,setQ]=useState("");
-  const [action,setAction]=useState("all");
-  const [msg,setMsg]=useState("");
-  const [loading,setLoading]=useState(true);
+export default function AuditLogsPage() {
+  const [logs, setLogs] = useState<Log[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [msg, setMsg] = useState("");
 
-  async function token(){
-    const {data}=await supabase.auth.getSession();
-    return data.session?.access_token || "";
-  }
+  async function load() {
+    setLoading(true);
+    setMsg("");
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token || "";
+    if (!token) {
+      window.location.href = "/admin";
+      return;
+    }
 
-  async function load(){
-    setLoading(true); setMsg("");
-    const t=await token();
-    if(!t){window.location.href="/admin";return;}
-    try{
-      const r=await fetch("/api/admin/logs",{headers:{Authorization:`Bearer ${t}`}});
-      const d=await r.json();
-      if(!r.ok){
-        setMsg(d.error||"Gagal mendapatkan audit log.");
-        if(r.status===401||r.status===403) setTimeout(()=>window.location.href="/admin",900);
+    try {
+      const r = await fetch("/api/admin/logs", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const d = await r.json();
+      if (!r.ok) {
+        setMsg(d.error || "Gagal mendapatkan audit trail.");
+        if (r.status === 401 || r.status === 403) {
+          setTimeout(() => (window.location.href = "/admin"), 900);
+        }
         return;
       }
-      setLogs(d.logs||[]);
-      setMe(d.me);
-    }catch{
+      setLogs(d.logs || []);
+    } catch {
       setMsg("Tidak dapat berhubung dengan server.");
-    }finally{setLoading(false)}
+    } finally {
+      setLoading(false);
+    }
   }
 
-  useEffect(()=>{load()},[]);
+  useEffect(() => {
+    load();
+  }, []);
 
-  const actions=useMemo(()=>Array.from(new Set(logs.map(x=>x.action))).sort(),[logs]);
-
-  const shown=useMemo(()=>{
-    const needle=q.toLowerCase();
-    return logs.filter(x=>{
-      const meta=JSON.stringify(x.metadata||{}).toLowerCase();
-      const hay=`${x.admin_email||""} ${x.action} ${meta}`.toLowerCase();
-      return (action==="all"||x.action===action)&&hay.includes(needle);
-    });
-  },[logs,q,action]);
-
-  function label(a:string){
-    const map:Record<string,string>={
-      approve_member:"Lulus Ahli",
-      reject_member:"Tolak Ahli",
-      edit_member:"Edit Ahli",
-      delete_member:"Padam Ahli",
-      create_admin:"Tambah Pentadbir",
-      edit_admin:"Edit Pentadbir",
-      update_admin:"Kemas Kini Pentadbir",
-      delete_admin:"Padam Pentadbir",
-      update_system_settings:"Kemas Kini Tetapan Sistem",
-      change_own_password:"Tukar Kata Laluan"
+  function label(action: string) {
+    const map: Record<string, string> = {
+      approve_member: "LULUS AHLI",
+      reject_member: "TOLAK AHLI",
+      edit_member: "EDIT AHLI",
+      delete_member: "PADAM AHLI",
+      create_admin: "TAMBAH PENTADBIR",
+      edit_admin: "EDIT PENTADBIR",
+      update_admin: "KEMAS KINI PENTADBIR",
+      delete_admin: "PADAM PENTADBIR",
+      update_system_settings: "KEMAS KINI TETAPAN SISTEM",
+      change_own_password: "TUKAR KATA LALUAN",
     };
-    return map[a]||a.replaceAll("_"," ");
+    return map[action] || action.replaceAll("_", " ").toUpperCase();
   }
 
-  function detail(l:Log){
-    const m=l.metadata||{};
-    if(l.action==="approve_member"||l.action==="reject_member")
-      return [m.member_name,m.membership_id].filter(Boolean).join(" · ")||"Permohonan ahli";
-    if(l.action==="create_admin")
-      return `${m.created_admin_email||"Pentadbir baharu"}${m.role?` · ${m.role==="super_admin"?"Pentadbir Utama":"Pentadbir"}`:""}`;
-    if(l.action==="update_admin")
-      return `${m.target_admin||"Pentadbir"}${m.changes?` · ${JSON.stringify(m.changes)}`:""}`;
-    return Object.keys(m).length?JSON.stringify(m):"—";
+  function detail(log: Log) {
+    const m = log.metadata || {};
+
+    if (log.action === "create_admin") {
+      return [
+        m.created_admin_email,
+        m.role === "super_admin" ? "Pentadbir Utama" : "Pentadbir",
+      ].filter(Boolean).join(" · ") || "Pentadbir baharu";
+    }
+
+    if (log.action === "delete_admin") {
+      return [
+        m.deleted_admin_email,
+        m.role === "super_admin" ? "Pentadbir Utama" : "Pentadbir",
+      ].filter(Boolean).join(" · ") || "Pentadbir";
+    }
+
+    if (log.action === "edit_admin" || log.action === "update_admin") {
+      return m.target_admin || m.edited_admin_email || "Pentadbir";
+    }
+
+    if (log.action === "approve_member" || log.action === "reject_member") {
+      return [m.member_name, m.membership_id].filter(Boolean).join(" · ") || "Ahli";
+    }
+
+    if (log.action === "edit_member" || log.action === "delete_member") {
+      return [m.member_name, m.membership_id].filter(Boolean).join(" · ") || "Ahli";
+    }
+
+    if (log.action === "update_system_settings") return "Tetapan sistem dikemas kini";
+    if (log.action === "change_own_password") return "Kata laluan pentadbir dikemas kini";
+
+    return "—";
   }
 
-  return <main className="audit-shell">
-    <div className="audit-wrap">
-      <header className="audit-header">
-        <div>
-          <span>UMNOSISWA MALAYSIA</span>
-          <h1>Audit Trail</h1>
-          <p>Rekod tindakan pentadbir untuk keselamatan, pemantauan dan akauntabiliti.</p>
-        </div>
-        <div className="audit-header-actions">
-          <Link href="/admin/admins">Urus Pentadbir</Link>
-          <Link href="/admin">← Papan Pemuka</Link>
-        </div>
-      </header>
-
-      <section className="audit-stats">
-        <div><span>Jumlah Aktiviti Direkodkan</span><strong>{logs.length}</strong></div>
-        <div><span>Luluskan</span><strong>{logs.filter(x=>x.action==="approve_member").length}</strong></div>
-        <div><span>Tolak</span><strong>{logs.filter(x=>x.action==="reject_member").length}</strong></div>
-        <div><span>Tindakan Pentadbir</span><strong>{logs.filter(x=>x.action.includes("admin")).length}</strong></div>
-      </section>
-
-      <section className="audit-card">
-        <div className="audit-card-head">
+  return (
+    <main className="audit-shell">
+      <div className="audit-wrap">
+        <header className="audit-header audit-header-simple">
           <div>
-            <span className="audit-kicker">KESELAMATAN & AKAUNTABILITI</span>
-            <h2>Aktiviti Pentadbir</h2>
-            {me&&<small>Log masuk: {me.email}</small>}
+            <span>UMNOSISWA MALAYSIA</span>
+            <h1>Audit Trail</h1>
+            <p>Rekod ringkas tindakan pentadbir.</p>
           </div>
-          <button onClick={load} disabled={loading}>{loading?"Memuatkan...":"Muat Semula"}</button>
-        </div>
+          <div className="audit-header-actions">
+            <Link href="/admin">← Papan Pemuka</Link>
+          </div>
+        </header>
 
-        <div className="audit-toolbar">
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Cari pentadbir, nama ahli, ID ahli..."/>
-          <select value={action} onChange={e=>setAction(e.target.value)}>
-            <option value="all">Semua Tindakan</option>
-            {actions.map(a=><option key={a} value={a}>{label(a)}</option>)}
-          </select>
-        </div>
+        <section className="audit-card audit-card-simple">
+          <div className="audit-card-head">
+            <div>
+              <h2>Aktiviti Pentadbir</h2>
+              <small>Setiap tindakan direkodkan secara automatik.</small>
+            </div>
+            <button onClick={load} disabled={loading}>
+              {loading ? "Memuatkan..." : "Muat Semula"}
+            </button>
+          </div>
 
-        {msg&&<div className="audit-msg">{msg}</div>}
+          {msg && <div className="audit-msg">{msg}</div>}
 
-        <div className="audit-table-wrap">
-          <table className="audit-table">
-            <thead><tr><th>Tarikh / Masa</th><th>Pentadbir</th><th>Tindakan</th><th>Butiran</th></tr></thead>
-            <tbody>
-              {shown.map(l=><tr key={l.id}>
-                <td>
-                  <strong>{new Date(l.created_at).toLocaleDateString("ms-MY")}</strong>
-                  <small>{new Date(l.created_at).toLocaleTimeString("ms-MY",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</small>
-                </td>
-                <td>{l.admin_email||"Tidak diketahui"}</td>
-                <td><span className={`audit-action ${l.action}`}>{label(l.action)}</span></td>
-                <td className="audit-detail">{detail(l)}</td>
-              </tr>)}
-              {!loading&&shown.length===0&&<tr><td colSpan={4} className="audit-empty">Tiada rekod ditemui.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-  </main>
+          <div className="audit-table-wrap">
+            <table className="audit-table">
+              <thead>
+                <tr>
+                  <th>Tarikh / Masa</th>
+                  <th>Pentadbir</th>
+                  <th>Tindakan</th>
+                  <th>Butiran</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => {
+                  const date = new Date(log.created_at);
+                  return (
+                    <tr key={log.id}>
+                      <td>
+                        <strong>{date.toLocaleDateString("ms-MY")}</strong>
+                        <small>
+                          {date.toLocaleTimeString("ms-MY", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                          })} PTG
+                        </small>
+                      </td>
+                      <td>{log.admin_email || "Tidak diketahui"}</td>
+                      <td>
+                        <span className={`audit-action ${log.action}`}>
+                          {label(log.action)}
+                        </span>
+                      </td>
+                      <td className="audit-detail-simple">{detail(log)}</td>
+                    </tr>
+                  );
+                })}
+                {!loading && logs.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="audit-empty">
+                      Tiada rekod ditemui.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
 }

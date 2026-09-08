@@ -12,6 +12,7 @@ type Member = {
   ic_number: string;
   umno_member_no: string;
   ipt_name: string;
+  campus: string | null;
   graduation_month: number | null;
   graduation_year: number;
   ipt_zone: string;
@@ -124,6 +125,7 @@ export default function MemberManagementPage() {
         m.ic_number,
         m.umno_member_no,
         m.ipt_name,
+        m.campus || "",
         m.ipt_zone,
         m.umno_division,
         m.membership_id || "",
@@ -169,6 +171,7 @@ export default function MemberManagementPage() {
         ic_number: form.ic_number,
         umno_member_no: form.umno_member_no,
         ipt_name: form.ipt_name,
+        campus: form.campus || null,
         graduation_month: form.graduation_month ? Number(form.graduation_month) : null,
         graduation_year: Number(form.graduation_year),
         ipt_zone: form.ipt_zone,
@@ -576,6 +579,11 @@ export default function MemberManagementPage() {
                   <option value="">Pilih IPT</option>
                   {IPTS.map(ipt=><option key={ipt} value={ipt}>{ipt}</option>)}
                 </select>
+              </label>
+
+              <label>
+                Kampus
+                <input value={String(form.campus || "")} onChange={e=>setForm({...form,campus:e.target.value})}/>
               </label>
 
               <label>
