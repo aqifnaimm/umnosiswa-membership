@@ -1,7 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import Script from "next/script";
+import { FormEvent, useEffect, useRef, useState } from "react";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement | string, options: Record<string, unknown>) => string;
+      reset: (widgetId?: string) => void;
+      remove: (widgetId?: string) => void;
+    };
+  }
+}
 
 const ipts = [
   { name: "UM", zone: "Lembah Klang" },
@@ -38,6 +49,11 @@ export default function RegisterPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState("Sistem sedang diselenggara. Sila cuba sebentar lagi.");
   const [selectedIpt, setSelectedIpt] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
   useEffect(() => {
     fetch("/api/settings")
@@ -51,11 +67,46 @@ export default function RegisterPage() {
       .finally(() => setSettingsLoading(false));
   }, []);
 
+
+  function renderTurnstile() {
+    if (!turnstileSiteKey || !turnstileRef.current || !window.turnstile || turnstileWidgetId.current) return;
+
+    turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: turnstileSiteKey,
+      theme: "auto",
+      callback: (token: string) => setTurnstileToken(token),
+      "expired-callback": () => {
+        setTurnstileToken("");
+        if (turnstileWidgetId.current) window.turnstile?.reset(turnstileWidgetId.current);
+      },
+      "error-callback": () => {
+        setTurnstileToken("");
+      }
+    });
+  }
+
+  function resetTurnstile() {
+    setTurnstileToken("");
+    if (turnstileWidgetId.current) {
+      window.turnstile?.reset(turnstileWidgetId.current);
+    }
+  }
+
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (!registrationOpen || maintenanceMode) {
       setError(maintenanceMode ? maintenanceMessage : "Pendaftaran keahlian sedang ditutup.");
+      return;
+    }
+
+    if (!turnstileSiteKey) {
+      setError("Turnstile belum dikonfigurasi. Sila cuba lagi sebentar lagi.");
+      return;
+    }
+
+    if (!turnstileToken) {
+      setError("Sila lengkapkan pengesahan keselamatan sebelum menghantar permohonan.");
       return;
     }
 
@@ -65,7 +116,10 @@ export default function RegisterPage() {
 
     const formElement = e.currentTarget;
     const form = new FormData(formElement);
-    const payload = Object.fromEntries(form.entries());
+    const payload = {
+      ...Object.fromEntries(form.entries()),
+      turnstile_token: turnstileToken
+    };
 
     try {
       const res = await fetch("/api/register", {
@@ -79,6 +133,7 @@ export default function RegisterPage() {
       setMessage("Permohonan berjaya dihantar. Status anda kini Dalam Semakan.");
       formElement.reset();
       setSelectedIpt("");
+      resetTurnstile();
     } catch (err: any) {
       setError(err.message || "Pendaftaran gagal.");
     } finally {
@@ -118,6 +173,12 @@ export default function RegisterPage() {
 
   return (
     <>
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+        strategy="afterInteractive"
+        onLoad={renderTurnstile}
+      />
+
       <nav className="nav">
         <div className="container nav-inner">
           <Link href="/" className="brand">UMNOSiswa Malaysia</Link>
@@ -238,7 +299,14 @@ export default function RegisterPage() {
             </div>
 
             <div className="field full">
-              <button className="btn btn-primary" disabled={loading}>
+              {turnstileSiteKey ? (
+                <div ref={turnstileRef} style={{ minHeight: 65, marginBottom: 12 }} />
+              ) : (
+                <div className="status err" style={{ marginBottom: 12 }}>
+                  Pengesahan keselamatan belum dikonfigurasi.
+                </div>
+              )}
+              <button className="btn btn-primary" disabled={loading || !turnstileToken}>
                 {loading ? "Menghantar..." : "Hantar Permohonan"}
               </button>
             </div>
