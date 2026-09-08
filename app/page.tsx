@@ -414,7 +414,7 @@ export default async function HomePage() {
           <div>
             <strong style={{display:"block",marginBottom:6}}>Hubungi Kami</strong>
             <a href="mailto:mahasiswaumno@gmail.com" style={{display:"block",marginBottom:4}}>mahasiswaumno@gmail.com</a>
-            <a href="https://www.instagram.com/umnosiswa/" target="_blank" rel="noopener noreferrer" style={{display:"block"}}>Instagram</a>
+            <a href="https://www.instagram.com/mahasiswaumno/" target="_blank" rel="noopener noreferrer" style={{display:"block"}}>Instagram</a>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
             <div>© 2026 {settings.org_name}</div>
