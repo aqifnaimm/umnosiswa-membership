@@ -377,7 +377,7 @@ export default async function HomePage() {
           </div>
 
           <div className="homev3-stat-grid homev3-stat-grid-four">
-            <article><span>Pelajar Aktif</span><strong>{stats.activeStudents}</strong><small>Ahli diluluskan yang masih dalam tempoh pengajian</small></article>
+            <article><span>Ahli Aktif</span><strong>{stats.activeStudents}</strong><small>Ahli diluluskan yang masih dalam tempoh pengajian</small></article>
             <article><span>Alumni</span><strong>{stats.alumni}</strong><small>Ahli diluluskan yang telah tamat pengajian</small></article>
             <article><span>IPT Terlibat</span><strong>{stats.institutions}</strong><small>Institusi dengan ahli aktif atau alumni</small></article>
             <article><span>Zon IPT</span><strong>6</strong><small>Utara, Lembah Klang, Selatan, Pantai Timur, Sabah, Sarawak</small></article>
