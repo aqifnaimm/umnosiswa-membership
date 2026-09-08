@@ -45,13 +45,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // Only active IPT admins can request self-service password recovery.
-    // Keep the response generic so the endpoint does not reveal whether a
-    // particular username exists.
-    if (!admin || !admin.is_active || admin.role !== "admin" || !admin.auth_user_id || !admin.email) {
+    // Active administrators (IPT admins and super admins) can request
+    // self-service password recovery. Keep the response generic so the
+    // endpoint does not reveal whether a particular username exists.
+    if (!admin || !admin.is_active || !["admin", "super_admin"].includes(admin.role) || !admin.auth_user_id || !admin.email) {
       return NextResponse.json({
         ok: true,
-        message: "Jika akaun Pentadbir IPT aktif dan mempunyai e-mel yang sah, pautan tetapan semula telah dihantar."
+        message: "Jika akaun Pentadbir aktif dan mempunyai e-mel yang sah, pautan tetapan semula telah dihantar."
       });
     }
 

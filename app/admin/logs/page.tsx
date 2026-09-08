@@ -62,8 +62,14 @@ export default function AuditLogsPage(){
     const map:Record<string,string>={
       approve_member:"Lulus Ahli",
       reject_member:"Tolak Ahli",
+      edit_member:"Edit Ahli",
+      delete_member:"Padam Ahli",
       create_admin:"Tambah Pentadbir",
-      update_admin:"Kemas Kini Pentadbir"
+      edit_admin:"Edit Pentadbir",
+      update_admin:"Kemas Kini Pentadbir",
+      delete_admin:"Padam Pentadbir",
+      update_system_settings:"Kemas Kini Tetapan Sistem",
+      change_own_password:"Tukar Kata Laluan"
     };
     return map[a]||a.replaceAll("_"," ");
   }
@@ -84,8 +90,8 @@ export default function AuditLogsPage(){
       <header className="audit-header">
         <div>
           <span>UMNOSISWA MALAYSIA</span>
-          <h1>Log Audit</h1>
-          <p>Rekod aktiviti pentadbir dalam sistem keahlian.</p>
+          <h1>Audit Trail</h1>
+          <p>Rekod tindakan pentadbir untuk keselamatan, pemantauan dan akauntabiliti.</p>
         </div>
         <div className="audit-header-actions">
           <Link href="/admin/admins">Urus Pentadbir</Link>
@@ -94,7 +100,7 @@ export default function AuditLogsPage(){
       </header>
 
       <section className="audit-stats">
-        <div><span>Jumlah Aktiviti</span><strong>{logs.length}</strong></div>
+        <div><span>Jumlah Aktiviti Direkodkan</span><strong>{logs.length}</strong></div>
         <div><span>Luluskan</span><strong>{logs.filter(x=>x.action==="approve_member").length}</strong></div>
         <div><span>Tolak</span><strong>{logs.filter(x=>x.action==="reject_member").length}</strong></div>
         <div><span>Tindakan Pentadbir</span><strong>{logs.filter(x=>x.action.includes("admin")).length}</strong></div>

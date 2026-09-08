@@ -2959,3 +2959,19 @@ linear-gradient(180deg,rgba(3,8,15,.2),rgba(3,8,15,.68))}
 .admin-password-grid input:focus { border-color:#e51b23; box-shadow:0 0 0 3px rgba(229,27,35,.08); }
 .admin-password-submit { width:auto; min-height:44px; margin-top:16px; padding:0 18px; }
 @media(max-width:800px){ .admin-password-grid{grid-template-columns:1fr;} .admin-account-card{align-items:flex-start;flex-direction:column;} .admin-password-submit{width:100%;} }
+
+/* ===== IPT ADMIN DASHBOARD ===== */
+.ipt-dashboard-section{margin-bottom:20px}
+.ipt-dashboard-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin-bottom:16px;padding:24px 26px;border-radius:18px;background:#fff;border:1px solid #e5e7eb;box-shadow:0 10px 30px rgba(0,0,0,.04)}
+.ipt-dashboard-heading h2{margin:5px 0 4px;font-size:28px}.ipt-dashboard-heading p{margin:0;color:#737983;font-size:13px}
+.ipt-kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:15px}
+.ipt-kpi-card{background:#fff;border:1px solid #e5e7eb;border-radius:15px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.035)}
+.ipt-kpi-card span{display:block;color:#6d7280;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.ipt-kpi-card strong{display:block;font-size:31px;margin-top:7px}.ipt-kpi-card small{display:block;margin-top:5px;color:#8a9099;font-size:11px}
+.ipt-dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.ipt-chart-card{background:#fff;border:1px solid #e3e6ea;border-radius:18px;padding:22px;box-shadow:0 10px 28px rgba(0,0,0,.035)}.ipt-chart-wide{grid-column:1/-1}
+.ipt-card-head span{color:#e51b23;font-size:10px;font-weight:900;letter-spacing:.14em}.ipt-card-head h3{font-size:19px;margin:5px 0 0}
+.ipt-month-chart{height:220px;display:grid;grid-template-columns:repeat(12,1fr);gap:8px;align-items:end;margin-top:18px}.ipt-month-column{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px}.ipt-month-column strong{font-size:10px}.ipt-month-track{height:160px;width:100%;max-width:42px;background:#f1f3f5;border-radius:7px;display:flex;align-items:flex-end;overflow:hidden}.ipt-month-track div{width:100%;background:#d6322f;border-radius:7px 7px 0 0}.ipt-month-column small{font-size:9px;color:#777}
+.ipt-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}.ipt-status-grid>div{padding:20px;background:#f8f9fb;border-radius:13px}.ipt-status-grid strong{display:block;font-size:32px}.ipt-status-grid span{font-size:11px;color:#777}.ipt-split-track{height:8px;background:#eee;border-radius:99px;margin-top:16px;overflow:hidden}.ipt-split-track div{height:100%;background:#111827;border-radius:99px}
+.ipt-status-list{display:flex;flex-direction:column;gap:14px;margin-top:20px}.ipt-status-list>div{display:flex;justify-content:space-between;align-items:center;font-size:13px}.ipt-status-list strong{font-size:18px}.ipt-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px}.ipt-dot.approved{background:#16a34a}.ipt-dot.pending{background:#f59e0b}.ipt-dot.rejected{background:#dc2626}
+@media(max-width:1050px){.ipt-kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.ipt-dashboard-heading{align-items:flex-start;flex-direction:column}.ipt-kpi-grid{grid-template-columns:repeat(2,1fr)}.ipt-dashboard-grid{grid-template-columns:1fr}.ipt-chart-wide{grid-column:auto}.ipt-month-chart{overflow-x:auto;grid-template-columns:repeat(12,52px)}}
+@media(max-width:430px){.ipt-kpi-grid{grid-template-columns:1fr}}
