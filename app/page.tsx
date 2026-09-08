@@ -155,8 +155,7 @@ export default async function HomePage() {
             <a href="#statistik">Statistik</a>
             <a href="#semakan">Semakan Keahlian</a>
             <Link href="/portal">Portal Ahli</Link>
-            <a href="https://www.instagram.com/umnosiswa/" target="_blank" rel="noopener noreferrer" className="homev3-nav-cta">Instagram</a>
-            <a href="mailto:mahasiswaumno@gmail.com" className="homev3-nav-cta">Hubungi Kami</a>
+            <a href="mailto:mahasiswaumno@gmail.com">Hubungi Kami</a>
             <Link href={settings.registration_open ? "/daftar" : "#pendaftaran"} className="homev3-nav-cta">
               {settings.registration_open ? "Daftar Keahlian" : "Pendaftaran Ditutup"}
             </Link>
@@ -412,10 +411,13 @@ export default async function HomePage() {
             <small>Portal Keahlian Digital</small>
           </div>
           <div>{settings.motto}</div>
+          <div>
+            <strong style={{display:"block",marginBottom:6}}>Hubungi Kami</strong>
+            <a href="mailto:mahasiswaumno@gmail.com" style={{display:"block",marginBottom:4}}>mahasiswaumno@gmail.com</a>
+            <a href="https://www.instagram.com/umnosiswa/" target="_blank" rel="noopener noreferrer" style={{display:"block"}}>Instagram</a>
+          </div>
           <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
             <div>© 2026 {settings.org_name}</div>
-            <a href="mailto:mahasiswaumno@gmail.com" aria-label="Hubungi UMNOSiswa Malaysia melalui email" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:34,padding:"0 12px",border:"1px solid rgba(255,255,255,.12)",borderRadius:9,background:"rgba(255,255,255,.05)",color:"rgba(255,255,255,.72)",fontSize:11,fontWeight:800,letterSpacing:".04em",textDecoration:"none"}}>Hubungi Kami</a>
-            <a href="https://www.instagram.com/umnosiswa/" target="_blank" rel="noopener noreferrer" aria-label="Instagram UMNOSiswa Malaysia" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:34,padding:"0 12px",border:"1px solid rgba(255,255,255,.12)",borderRadius:9,background:"rgba(255,255,255,.05)",color:"rgba(255,255,255,.72)",fontSize:11,fontWeight:800,letterSpacing:".04em",textDecoration:"none"}}>Instagram</a>
             <Link
               href="/admin"
               aria-label="Akses Pentadbir"
