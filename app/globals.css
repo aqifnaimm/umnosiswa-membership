@@ -2892,3 +2892,34 @@ linear-gradient(180deg,rgba(3,8,15,.2),rgba(3,8,15,.68))}
   .privacy-consent-box>small{margin-left:29px}
 }
   
+
+.admin-forgot-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.78);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-forgot-btn:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.admin-forgot-btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.admin-reset-note {
+  margin: 0 0 18px;
+  color: rgba(255,255,255,.78);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+}

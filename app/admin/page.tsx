@@ -37,6 +37,7 @@ export default function AdminPage() {
   const [filter, setFilter] = useState("all");
   const [showPassword, setShowPassword] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   useEffect(() => {
     restoreSession();
@@ -97,6 +98,39 @@ export default function AdminPage() {
       setMsg("Tidak dapat berhubung dengan server.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function forgotPassword() {
+    const value = username.trim();
+
+    if (!value) {
+      setMsg("Masukkan nama pengguna pentadbir terlebih dahulu.");
+      return;
+    }
+
+    setForgotLoading(true);
+    setMsg("");
+
+    try {
+      const res = await fetch("/api/admin/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: value })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMsg(data.error || "Tidak dapat menghantar pautan tetapan semula kata laluan.");
+        return;
+      }
+
+      setMsg(data.message || "Pautan tetapan semula kata laluan telah dihantar ke e-mel pentadbir.");
+    } catch {
+      setMsg("Tidak dapat berhubung dengan server.");
+    } finally {
+      setForgotLoading(false);
     }
   }
 
@@ -319,9 +353,18 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <button className="admin-login-btn" disabled={!username || !password || loading} onClick={login}>
+            <button className="admin-login-btn" disabled={!username || !password || loading || forgotLoading} onClick={login}>
               <span>{loading ? "Menyemak..." : "Log Masuk"}</span>
               <span>→</span>
+            </button>
+
+            <button
+              type="button"
+              className="admin-forgot-btn"
+              disabled={!username || loading || forgotLoading}
+              onClick={forgotPassword}
+            >
+              {forgotLoading ? "Menghantar pautan..." : "Lupa Kata Laluan?"}
             </button>
 
             {msg && <div className="admin-error">{msg}</div>}
