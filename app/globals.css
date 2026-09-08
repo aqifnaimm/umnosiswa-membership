@@ -2975,3 +2975,7 @@ linear-gradient(180deg,rgba(3,8,15,.2),rgba(3,8,15,.68))}
 @media(max-width:1050px){.ipt-kpi-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.ipt-dashboard-heading{align-items:flex-start;flex-direction:column}.ipt-kpi-grid{grid-template-columns:repeat(2,1fr)}.ipt-dashboard-grid{grid-template-columns:1fr}.ipt-chart-wide{grid-column:auto}.ipt-month-chart{overflow-x:auto;grid-template-columns:repeat(12,52px)}}
 @media(max-width:430px){.ipt-kpi-grid{grid-template-columns:1fr}}
+.audit-action.delete_member,.audit-action.delete_admin,.audit-action.reject_member{background:#fff1f2;color:#be123c}
+.audit-action.edit_member,.audit-action.edit_admin,.audit-action.update_admin{background:#eef2ff;color:#3730a3}
+.audit-action.update_system_settings,.audit-action.change_own_password{background:#f3f4f6;color:#374151}
+.audit-action.approve_member{background:#ecfdf3;color:#166534}
